@@ -1,0 +1,42 @@
+# Compiled output
+/dist
+/build
+
+# Node modules
+/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Vitest / Coverage
+coverage
+*.lcov
+
+# SQLite database files
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+
+# IDE / Editor
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# TypeScript build info
+*.tsbuildinfo
