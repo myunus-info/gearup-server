@@ -25,7 +25,7 @@ import { User } from './entities/user.entity.js';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post(['signup', 'register'])
+  @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Register a new user account' })
@@ -38,7 +38,7 @@ export class AuthController {
     };
   }
 
-  @Post(['signin', 'login'])
+  @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Authenticate user and set httpOnly session cookies' })
@@ -91,7 +91,7 @@ export class AuthController {
     };
   }
 
-  @Post(['signout', 'logout'])
+  @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sign out user and clear httpOnly session cookies' })
   async logout(@Res({ passthrough: true }) res: Response) {

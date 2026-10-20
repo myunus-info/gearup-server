@@ -57,7 +57,7 @@ describe('Authentication & Protected Flow (E2E)', () => {
 
   it('Registers a provider with shop profile', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/v1/auth/signup')
+      .post('/api/v1/auth/register')
       .send({
         name: 'Bob Lensman',
         email: 'bob@example.com',
@@ -92,7 +92,7 @@ describe('Authentication & Protected Flow (E2E)', () => {
 
   it('Logs in provider to get provider bearer token', async () => {
     const res = await request(app.getHttpServer())
-      .post('/api/v1/auth/signin')
+      .post('/api/v1/auth/login')
       .send({
         email: 'bob@example.com',
         password: 'password123',

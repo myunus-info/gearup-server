@@ -19,7 +19,7 @@ This modernized backend is rebuilt adhering to the `nestjs-skill` production blu
 - **Automated Inventory & Transaction Integrity** — Atomically decrements available inventory upon order placement, and automatically rolls back/restores gear quantity when orders are returned or cancelled.
 - **Integrated Payments (SSLCommerz & Sandbox Fallback)** — Seamless checkout flow initiating gateway sessions, handling IPN webhooks, and marking payments `PAID` and orders `CONFIRMED`.
 - **Environment Validation (class-validator)** — Strictly typed configuration using `class-validator` + `class-transformer` without redundant external validation libraries.
-- **Rate Limiting (`@nestjs/throttler`)** — Platform-wide throttling with sensitive route overrides (`5 req/min` on login/signup, `10 req/min` on refresh-token).
+- **Rate Limiting (`@nestjs/throttler`)** — Platform-wide throttling with sensitive route overrides (`5 req/min` on login/register, `10 req/min` on refresh-token).
 - **Interactive OpenAPI / Swagger** — Introspected Swagger docs at `/api/docs` with auto-documented DTOs via the `@nestjs/swagger` compiler plugin.
 - **High-Speed Testing & Linting** — Fast Vitest unit/e2e test suite and Oxlint verification.
 
@@ -41,7 +41,7 @@ gearup-server/
 │   ├── config/
 │   │   └── env.validation.ts   # class-validator environment validation
 │   ├── modules/
-│   │   ├── auth/               # Signup, signin, refresh-token, signout, getMe
+│   │   ├── auth/               # Register, login, refresh-token, logout, getMe
 │   │   │   └── entities/       # User, ProviderProfile
 │   │   ├── admin/              # User oversight, status toggle, platform audit
 │   │   ├── categories/         # Category CRUD
@@ -146,10 +146,10 @@ Error envelope:
 
 | Area | Method | Endpoint | Access | Description |
 |---|---|---|---|---|
-| **Auth** | POST | `/api/v1/auth/register` (or `/signup`) | Public | Register new user (`CUSTOMER`, `PROVIDER`, or `ADMIN`) |
-| | POST | `/api/v1/auth/login` (or `/signin`) | Public | Authenticate user & set httpOnly cookies |
+| **Auth** | POST | `/api/v1/auth/register` | Public | Register new user (`CUSTOMER`, `PROVIDER`, or `ADMIN`) |
+| | POST | `/api/v1/auth/login` | Public | Authenticate user & set httpOnly cookies |
 | | POST | `/api/v1/auth/refresh-token` | Public | Refresh access token from cookie/body |
-| | POST | `/api/v1/auth/logout` (or `/signout`) | Public | Clear httpOnly session cookies |
+| | POST | `/api/v1/auth/logout` | Public | Clear httpOnly session cookies |
 | | GET | `/api/v1/auth/me` | `@Auth()` | Get current authenticated user profile |
 | **Categories** | POST | `/api/v1/categories` | `@Auth(Role.PROVIDER)` | Create a gear category |
 | | GET | `/api/v1/categories` | Public | List all categories with gear count |
