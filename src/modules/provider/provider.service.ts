@@ -98,12 +98,43 @@ export class ProviderService {
       }
     }
 
+    if (dto.quantityTotal !== undefined) {
+      const delta = dto.quantityTotal - gear.quantityTotal;
+      const newAvailable = gear.quantityAvailable + delta;
+      if (newAvailable < 0) {
+        throw new BadRequestException(
+          `Cannot reduce total quantity below currently rented quantity (${gear.quantityTotal - gear.quantityAvailable} units currently rented)`,
+        );
+      }
+      gear.quantityAvailable = newAvailable;
+    }
+
     Object.assign(gear, dto);
     return this.gearRepository.save(gear);
   }
 
   async deleteGear(gearId: string, providerId: string): Promise<{ id: string }> {
     const gear = await this.getGearById(gearId, providerId);
+
+    const activeOrdersCount = await this.rentalOrderRepository
+      .createQueryBuilder('order')
+      .innerJoin('order.items', 'item')
+      .where('item.gearItemId = :gearId', { gearId })
+      .andWhere('order.status IN (:...activeStatuses)', {
+        activeStatuses: [
+          RentalStatus.PLACED,
+          RentalStatus.CONFIRMED,
+          RentalStatus.PICKED_UP,
+        ],
+      })
+      .getCount();
+
+    if (activeOrdersCount > 0) {
+      throw new BadRequestException(
+        'Cannot delete gear that is part of active rental orders',
+      );
+    }
+
     await this.gearRepository.remove(gear);
     return { id: gearId };
   }

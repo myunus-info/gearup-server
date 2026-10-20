@@ -18,8 +18,22 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Security & Cross-Origin (Configured for Next.js ofetch credentials: "include")
+  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+  const appUrl = configService.get<string>('APP_URL');
+
   app.enableCors({
-    origin: true,
+    origin: isProduction
+      ? (
+          origin: string | undefined,
+          callback: (err: Error | null, allow?: boolean) => void,
+        ) => {
+          if (!origin || origin === appUrl) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        }
+      : true,
     credentials: true,
   });
 

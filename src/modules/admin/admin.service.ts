@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../auth/entities/user.entity.js';
@@ -23,18 +23,18 @@ export class AdminService {
       relations: { providerProfile: true },
     });
 
-    if (!users || users.length === 0) {
-      throw new NotFoundException('Users not found!');
-    }
-
-    return users.map((user) => {
+    return (users || []).map((user) => {
       const { password: _pw, ...safeUser } = user;
       void _pw;
       return safeUser;
     });
   }
 
-  async updateUserStatus(userId: string, status: UserStatus) {
+  async updateUserStatus(userId: string, status: UserStatus, currentAdminId?: string) {
+    if (currentAdminId && currentAdminId === userId) {
+      throw new BadRequestException('Admins cannot change their own status');
+    }
+
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -57,11 +57,7 @@ export class AdminService {
       order: { createdAt: 'DESC' },
     });
 
-    if (!gearListings || gearListings.length === 0) {
-      throw new NotFoundException('No gear listing found!');
-    }
-
-    return gearListings;
+    return gearListings || [];
   }
 
   async getAllRentalOrders() {
@@ -74,10 +70,6 @@ export class AdminService {
       order: { createdAt: 'DESC' },
     });
 
-    if (!rentals || rentals.length === 0) {
-      throw new NotFoundException('No rental order found!');
-    }
-
-    return rentals;
+    return rentals || [];
   }
 }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -9,7 +10,9 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AdminService } from './admin.service.js';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto.js';
 import { Auth } from '../../common/decorators/auth.decorator.js';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Role } from '../../common/enums/role.enum.js';
+import { User } from '../auth/entities/user.entity.js';
 
 @ApiTags('Admin Oversight')
 @Controller('admin')
@@ -34,8 +37,12 @@ export class AdminController {
   async updateUserStatus(
     @Param('id') id: string,
     @Body() dto: UpdateUserStatusDto,
+    @CurrentUser() admin: User,
   ) {
-    const user = await this.adminService.updateUserStatus(id, dto.status);
+    if (admin.id === id) {
+      throw new BadRequestException('Admins cannot change their own status');
+    }
+    const user = await this.adminService.updateUserStatus(id, dto.status, admin.id);
     return {
       message: 'User status updated successfully',
       data: user,

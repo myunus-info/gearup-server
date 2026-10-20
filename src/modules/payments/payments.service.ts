@@ -45,6 +45,18 @@ export class PaymentsService {
         throw new NotFoundException(`Payment record for order ${orderId} not found!`);
       }
 
+      // Idempotency: Return immediately if already confirmed
+      if (payment.status === PaymentStatus.PAID) {
+        const existingOrder = await manager.findOne(RentalOrder, {
+          where: { id: orderId },
+        });
+        return {
+          payment,
+          order: existingOrder,
+          verification: verificationResponse,
+        };
+      }
+
       payment.transactionId = tranId;
       payment.status = PaymentStatus.PAID;
       payment.method = verificationResponse.card_type || 'CREDIT_CARD';

@@ -44,14 +44,36 @@ export class RentalsService {
       throw new BadRequestException('Invalid start or end date');
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const compareStart = new Date(startDate);
+    compareStart.setHours(0, 0, 0, 0);
+
+    if (compareStart < today) {
+      throw new BadRequestException('Start date cannot be in the past');
+    }
+
     if (endDate < startDate) {
       throw new BadRequestException('End date cannot be earlier than start date');
     }
 
     const numDays = daysBetween(startDate, endDate);
 
-    return this.dataSource.transaction(async (manager) => {
-      const gearIds = dto.items.map((i) => i.gearItemId);
+    // Consolidate duplicate item entries in request
+    const aggregatedMap = new Map<string, number>();
+    for (const item of dto.items) {
+      aggregatedMap.set(
+        item.gearItemId,
+        (aggregatedMap.get(item.gearItemId) || 0) + item.quantity,
+      );
+    }
+    const consolidatedItems = Array.from(aggregatedMap.entries()).map(
+      ([gearItemId, quantity]) => ({ gearItemId, quantity }),
+    );
+
+    // 1. Atomically create order, items, and pending payment inside DB transaction
+    const savedOrder = await this.dataSource.transaction(async (manager) => {
+      const gearIds = consolidatedItems.map((i) => i.gearItemId);
       const gearItems = await manager.find(GearItem, {
         where: { id: In(gearIds) },
       });
@@ -63,7 +85,7 @@ export class RentalsService {
       let totalAmount = 0;
       const orderItemsToCreate: Array<Partial<RentalOrderItem>> = [];
 
-      for (const reqItem of dto.items) {
+      for (const reqItem of consolidatedItems) {
         const gear = gearItems.find((g) => g.id === reqItem.gearItemId);
 
         if (!gear || !gear.isActive) {
@@ -72,9 +94,22 @@ export class RentalsService {
           );
         }
 
-        if (gear.quantityAvailable < reqItem.quantity) {
+        // Concurrency-safe atomic conditional stock decrement
+        const decrementResult = await manager
+          .createQueryBuilder()
+          .update(GearItem)
+          .set({
+            quantityAvailable: () => `quantityAvailable - ${reqItem.quantity}`,
+          })
+          .where('id = :id AND quantityAvailable >= :quantity', {
+            id: gear.id,
+            quantity: reqItem.quantity,
+          })
+          .execute();
+
+        if (decrementResult.affected === 0) {
           throw new BadRequestException(
-            `Insufficient stock for "${gear.name}". Available quantity: (${gear.quantityAvailable})`,
+            `Insufficient stock for "${gear.name}". The requested quantity (${reqItem.quantity}) is not available.`,
           );
         }
 
@@ -87,14 +122,6 @@ export class RentalsService {
           pricePerDaySnapshot: Number(gear.pricePerDay),
           subtotal,
         });
-
-        // Decrement available stock
-        await manager.decrement(
-          GearItem,
-          { id: gear.id },
-          'quantityAvailable',
-          reqItem.quantity,
-        );
       }
 
       // Create order
@@ -106,19 +133,39 @@ export class RentalsService {
         status: RentalStatus.PLACED,
       });
 
-      const savedOrder = await manager.save(RentalOrder, order);
+      const persistedOrder = await manager.save(RentalOrder, order);
 
       // Create order items
       const items = orderItemsToCreate.map((item) =>
         manager.create(RentalOrderItem, {
           ...item,
-          rentalOrderId: savedOrder.id,
+          rentalOrderId: persistedOrder.id,
         }),
       );
       await manager.save(RentalOrderItem, items);
 
-      // Initiate payment
-      const paymentUrl = await this.paymentsService.initiatePayment(
+      // Record pending payment
+      const payment = manager.create(Payment, {
+        rentalOrderId: persistedOrder.id,
+        amount: persistedOrder.totalAmount,
+        status: PaymentStatus.PENDING,
+      });
+      await manager.save(Payment, payment);
+
+      return manager.findOne(RentalOrder, {
+        where: { id: persistedOrder.id },
+        relations: { items: { gearItem: true } },
+      });
+    });
+
+    if (!savedOrder) {
+      throw new BadRequestException('Failed to place rental order');
+    }
+
+    // 2. Perform external network payment initiation OUTSIDE database transaction
+    let paymentUrl: string | null = null;
+    try {
+      paymentUrl = await this.paymentsService.initiatePayment(
         {
           id: customer.id,
           name: customer.name,
@@ -131,25 +178,14 @@ export class RentalsService {
           totalAmount: savedOrder.totalAmount,
         },
       );
+    } catch {
+      paymentUrl = null;
+    }
 
-      // Record pending payment
-      const payment = manager.create(Payment, {
-        rentalOrderId: savedOrder.id,
-        amount: savedOrder.totalAmount,
-        status: PaymentStatus.PENDING,
-      });
-      await manager.save(Payment, payment);
-
-      const completeOrder = await manager.findOne(RentalOrder, {
-        where: { id: savedOrder.id },
-        relations: { items: { gearItem: true } },
-      });
-
-      return {
-        order: completeOrder,
-        paymentUrl,
-      };
-    });
+    return {
+      order: savedOrder,
+      paymentUrl,
+    };
   }
 
   async getMyRentalOrders(customerId: string): Promise<RentalOrder[]> {

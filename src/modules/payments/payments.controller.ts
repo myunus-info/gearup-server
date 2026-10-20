@@ -20,7 +20,7 @@ import { User } from '../auth/entities/user.entity.js';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Post('confirm')
+  @Post(['confirm', 'ipn'])
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'SSLCommerz payment confirmation webhook / IPN callback' })
   @ApiResponse({ status: 200, description: 'Payment successfully confirmed and order status updated' })

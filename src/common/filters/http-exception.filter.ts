@@ -17,7 +17,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
+    let status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -27,6 +27,29 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let message: string = 'Internal server error';
     let errorSources: Array<{ path: string; message: string }> | undefined = undefined;
+
+    // Translate TypeORM database errors to clean client HTTP statuses
+    if (
+      exception &&
+      typeof exception === 'object' &&
+      'name' in exception &&
+      exception.name === 'QueryFailedError'
+    ) {
+      const err = exception as any;
+      if (
+        err.code === '23505' ||
+        (err.message && (err.message.includes('UNIQUE') || err.message.includes('duplicate')))
+      ) {
+        status = HttpStatus.CONFLICT;
+        message = 'Conflict: A record with unique field already exists';
+      } else if (
+        err.code === '23503' ||
+        (err.message && err.message.includes('FOREIGN KEY'))
+      ) {
+        status = HttpStatus.BAD_REQUEST;
+        message = 'Foreign key constraint violation: referenced record does not exist or cannot be modified';
+      }
+    }
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
       const resp = exceptionResponse as Record<string, any>;

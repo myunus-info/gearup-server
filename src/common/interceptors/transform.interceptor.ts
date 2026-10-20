@@ -36,13 +36,17 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
         let data = result;
         let meta: Record<string, unknown> | undefined = undefined;
 
-        if (result && typeof result === 'object' && ('data' in result || 'message' in result)) {
+        if (
+          result &&
+          typeof result === 'object' &&
+          !Array.isArray(result) &&
+          !(result instanceof Date) &&
+          'data' in result
+        ) {
           if ('message' in result && typeof result.message === 'string') {
             message = result.message;
           }
-          if ('data' in result) {
-            data = result.data;
-          }
+          data = result.data;
           if ('meta' in result) {
             meta = result.meta as Record<string, unknown>;
           }

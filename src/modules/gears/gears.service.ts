@@ -63,8 +63,25 @@ export class GearsService {
 
     const [items, total] = await qb.skip(skip).take(limit).getManyAndCount();
 
+    const formattedItems = items.map((gear) => {
+      const reviews = gear.reviews || [];
+      const totalReviews = reviews.length;
+      const avgRating =
+        totalReviews > 0
+          ? Math.round(
+              (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10,
+            ) / 10
+          : 0;
+      Object.assign(gear, {
+        avgRating,
+        averageRating: avgRating,
+        totalReviews,
+      });
+      return gear;
+    });
+
     return {
-      data: items,
+      data: formattedItems,
       meta: {
         page,
         limit,
@@ -74,7 +91,7 @@ export class GearsService {
     };
   }
 
-  async findById(id: string): Promise<GearItem> {
+  async findById(id: string) {
     const gear = await this.gearRepository
       .createQueryBuilder('gear')
       .leftJoinAndSelect('gear.category', 'category')
@@ -82,13 +99,28 @@ export class GearsService {
       .addSelect(['provider.id', 'provider.name', 'provider.email'])
       .leftJoinAndSelect('gear.reviews', 'review')
       .leftJoin('review.customer', 'customer')
-      .addSelect(['customer.id', 'customer.name'])
+      .addSelect(['customer.id', 'customer.name', 'customer.avatarUrl'])
       .where('gear.id = :id', { id })
       .getOne();
 
     if (!gear) {
       throw new NotFoundException(`The gear item with id ${id} not found!`);
     }
+
+    const reviews = gear.reviews || [];
+    const totalReviews = reviews.length;
+    const avgRating =
+      totalReviews > 0
+        ? Math.round(
+            (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10,
+          ) / 10
+        : 0;
+
+    Object.assign(gear, {
+      avgRating,
+      averageRating: avgRating,
+      totalReviews,
+    });
 
     return gear;
   }

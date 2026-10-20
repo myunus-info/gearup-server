@@ -15,6 +15,7 @@ describe('AuthService', () => {
       findOne: vi.fn(),
       create: vi.fn((data) => ({ ...data, id: 'user-uuid-1' })),
       save: vi.fn((data) => Promise.resolve({ ...data, id: 'user-uuid-1' })),
+      createQueryBuilder: vi.fn(),
     };
     mockProfileRepo = {
       create: vi.fn((data) => ({ ...data, id: 'profile-uuid-1' })),
@@ -71,14 +72,20 @@ describe('AuthService', () => {
     const bcrypt = await import('bcryptjs');
     const hashedPassword = await bcrypt.default.hash('password123', 4);
 
-    mockUserRepo.findOne.mockResolvedValue({
-      id: 'user-uuid-1',
-      name: 'John Customer',
-      email: 'john@example.com',
-      password: hashedPassword,
-      role: Role.CUSTOMER,
-      status: UserStatus.ACTIVE,
-    });
+    const qbMock = {
+      addSelect: vi.fn().mockReturnThis(),
+      leftJoinAndSelect: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      getOne: vi.fn().mockResolvedValue({
+        id: 'user-uuid-1',
+        name: 'John Customer',
+        email: 'john@example.com',
+        password: hashedPassword,
+        role: Role.CUSTOMER,
+        status: UserStatus.ACTIVE,
+      }),
+    };
+    mockUserRepo.createQueryBuilder.mockReturnValue(qbMock);
 
     const result = await service.login({
       email: 'john@example.com',
