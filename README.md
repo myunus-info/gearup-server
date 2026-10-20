@@ -115,7 +115,7 @@ npm run build
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 All endpoints are prefixed with `/api/v1`.
 
