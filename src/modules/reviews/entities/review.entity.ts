@@ -7,6 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
+  type Relation,
 } from 'typeorm';
 import { User } from '../../auth/entities/user.entity.js';
 import { GearItem } from '../../gears/entities/gear-item.entity.js';
@@ -41,17 +42,17 @@ export class Review {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })
-  customer: User;
+  customer: Relation<User>;
 
   @ManyToOne(() => GearItem, (gear) => gear.reviews, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'gearItemId' })
-  gearItem: GearItem;
+  gearItem: Relation<GearItem>;
 
   @ManyToOne(() => RentalOrder, (order) => order.reviews, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'rentalOrderId' })
-  rentalOrder: RentalOrder;
+  rentalOrder: Relation<RentalOrder>;
 }

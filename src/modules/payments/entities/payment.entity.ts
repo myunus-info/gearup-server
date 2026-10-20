@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  type Relation,
 } from 'typeorm';
 import { PaymentProvider } from '../../../common/enums/payment-provider.enum.js';
 import { PaymentStatus } from '../../../common/enums/payment-status.enum.js';
@@ -60,5 +61,5 @@ export class Payment {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'rentalOrderId' })
-  rentalOrder: RentalOrder;
+  rentalOrder: Relation<RentalOrder>;
 }

@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  type Relation,
 } from 'typeorm';
 import { GearCondition } from '../../../common/enums/gear-condition.enum.js';
 import { User } from '../../auth/entities/user.entity.js';
@@ -84,17 +85,17 @@ export class GearItem {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'providerId' })
-  provider: User;
+  provider: Relation<User>;
 
   @ManyToOne(() => Category, (category) => category.gearItems, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'categoryId' })
-  category: Category;
+  category: Relation<Category>;
 
   @OneToMany(() => RentalOrderItem, (item) => item.gearItem)
-  orderItems: RentalOrderItem[];
+  orderItems: Relation<RentalOrderItem[]>;
 
   @OneToMany(() => Review, (review) => review.gearItem)
-  reviews: Review[];
+  reviews: Relation<Review[]>;
 }

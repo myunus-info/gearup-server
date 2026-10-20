@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  type Relation,
 } from 'typeorm';
 import { RentalOrder } from './rental-order.entity.js';
 import { GearItem } from '../../gears/entities/gear-item.entity.js';
@@ -46,11 +47,11 @@ export class RentalOrderItem {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'rentalOrderId' })
-  rentalOrder: RentalOrder;
+  rentalOrder: Relation<RentalOrder>;
 
   @ManyToOne(() => GearItem, (gear) => gear.orderItems, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'gearItemId' })
-  gearItem: GearItem;
+  gearItem: Relation<GearItem>;
 }

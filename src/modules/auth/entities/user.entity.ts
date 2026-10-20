@@ -6,6 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  type Relation,
 } from 'typeorm';
 import { Role } from '../../../common/enums/role.enum.js';
 import { UserStatus } from '../../../common/enums/user-status.enum.js';
@@ -58,14 +59,14 @@ export class User {
   @OneToOne(() => ProviderProfile, (profile) => profile.user, {
     cascade: true,
   })
-  providerProfile?: ProviderProfile;
+  providerProfile?: Relation<ProviderProfile>;
 
   @OneToMany(() => GearItem, (gear) => gear.provider)
-  gearItems: GearItem[];
+  gearItems: Relation<GearItem[]>;
 
   @OneToMany(() => RentalOrder, (order) => order.customer)
-  rentalOrders: RentalOrder[];
+  rentalOrders: Relation<RentalOrder[]>;
 
   @OneToMany(() => Review, (review) => review.customer)
-  reviews: Review[];
+  reviews: Relation<Review[]>;
 }

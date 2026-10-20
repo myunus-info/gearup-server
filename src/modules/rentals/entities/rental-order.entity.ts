@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  type Relation,
 } from 'typeorm';
 import { RentalStatus } from '../../../common/enums/rental-status.enum.js';
 import { User } from '../../auth/entities/user.entity.js';
@@ -64,16 +65,16 @@ export class RentalOrder {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })
-  customer: User;
+  customer: Relation<User>;
 
   @OneToMany(() => RentalOrderItem, (item) => item.rentalOrder, {
     cascade: true,
   })
-  items: RentalOrderItem[];
+  items: Relation<RentalOrderItem[]>;
 
   @OneToMany(() => Payment, (payment) => payment.rentalOrder)
-  payments: Payment[];
+  payments: Relation<Payment[]>;
 
   @OneToMany(() => Review, (review) => review.rentalOrder)
-  reviews: Review[];
+  reviews: Relation<Review[]>;
 }

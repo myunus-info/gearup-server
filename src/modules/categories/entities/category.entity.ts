@@ -4,6 +4,7 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  type Relation,
 } from 'typeorm';
 import { GearItem } from '../../gears/entities/gear-item.entity.js';
 
@@ -22,5 +23,5 @@ export class Category {
   createdAt: Date;
 
   @OneToMany(() => GearItem, (gear) => gear.category)
-  gearItems: GearItem[];
+  gearItems: Relation<GearItem[]>;
 }

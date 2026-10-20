@@ -6,6 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  type Relation,
 } from 'typeorm';
 import { User } from './user.entity.js';
 
@@ -36,5 +37,5 @@ export class ProviderProfile {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: Relation<User>;
 }
