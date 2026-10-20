@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { RentalOrder } from './rental-order.entity.js';
-import { GearItem } from './gear-item.entity.js';
-import { numericTransformer } from './transformers.js';
+import { GearItem } from '../../gears/entities/gear-item.entity.js';
+import { numericTransformer } from '../../../common/transformers/numeric.transformer.js';
 
 @Entity('rental_order_items')
 @Index(['rentalOrderId'])

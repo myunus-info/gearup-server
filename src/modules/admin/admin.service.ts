@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../entities/user.entity.js';
-import { GearItem } from '../../entities/gear-item.entity.js';
-import { RentalOrder } from '../../entities/rental-order.entity.js';
+import { User } from '../auth/entities/user.entity.js';
+import { GearItem } from '../gears/entities/gear-item.entity.js';
+import { RentalOrder } from '../rentals/entities/rental-order.entity.js';
 import { UserStatus } from '../../common/enums/user-status.enum.js';
 
 @Injectable()

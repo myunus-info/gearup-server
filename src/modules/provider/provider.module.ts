@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GearItem } from '../../entities/gear-item.entity.js';
-import { Category } from '../../entities/category.entity.js';
-import { RentalOrder } from '../../entities/rental-order.entity.js';
+import { GearItem } from '../gears/entities/gear-item.entity.js';
+import { Category } from '../categories/entities/category.entity.js';
+import { RentalOrder } from '../rentals/entities/rental-order.entity.js';
 import { ProviderController } from './provider.controller.js';
 import { ProviderService } from './provider.service.js';
 

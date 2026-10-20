@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { GearItem } from '../../entities/gear-item.entity.js';
-import { Category } from '../../entities/category.entity.js';
-import { RentalOrder } from '../../entities/rental-order.entity.js';
+import { GearItem } from '../gears/entities/gear-item.entity.js';
+import { Category } from '../categories/entities/category.entity.js';
+import { RentalOrder } from '../rentals/entities/rental-order.entity.js';
 import { RentalStatus } from '../../common/enums/rental-status.enum.js';
 import { CreateGearDto } from './dto/create-gear.dto.js';
 import { UpdateGearDto } from './dto/update-gear.dto.js';

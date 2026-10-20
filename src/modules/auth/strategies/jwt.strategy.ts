@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { Request } from 'express';
-import { User } from '../../../entities/user.entity.js';
+import { User } from '../entities/user.entity.js';
 import { UserStatus } from '../../../common/enums/user-status.enum.js';
 
 export interface JwtPayload {

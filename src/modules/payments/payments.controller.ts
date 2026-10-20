@@ -13,7 +13,7 @@ import { ConfirmPaymentDto } from './dto/confirm-payment.dto.js';
 import { Auth } from '../../common/decorators/auth.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Role } from '../../common/enums/role.enum.js';
-import { User } from '../../entities/user.entity.js';
+import { User } from '../auth/entities/user.entity.js';
 
 @ApiTags('Payments')
 @Controller('payments')

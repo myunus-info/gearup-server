@@ -7,10 +7,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PaymentProvider } from '../common/enums/payment-provider.enum.js';
-import { PaymentStatus } from '../common/enums/payment-status.enum.js';
-import { RentalOrder } from './rental-order.entity.js';
-import { numericTransformer } from './transformers.js';
+import { PaymentProvider } from '../../../common/enums/payment-provider.enum.js';
+import { PaymentStatus } from '../../../common/enums/payment-status.enum.js';
+import { RentalOrder } from '../../rentals/entities/rental-order.entity.js';
+import { numericTransformer } from '../../../common/transformers/numeric.transformer.js';
 
 @Entity('payments')
 @Index(['rentalOrderId'])

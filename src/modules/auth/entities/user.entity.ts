@@ -7,12 +7,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../common/enums/role.enum.js';
-import { UserStatus } from '../common/enums/user-status.enum.js';
+import { Role } from '../../../common/enums/role.enum.js';
+import { UserStatus } from '../../../common/enums/user-status.enum.js';
 import { ProviderProfile } from './provider-profile.entity.js';
-import { GearItem } from './gear-item.entity.js';
-import { RentalOrder } from './rental-order.entity.js';
-import { Review } from './review.entity.js';
+import { GearItem } from '../../gears/entities/gear-item.entity.js';
+import { RentalOrder } from '../../rentals/entities/rental-order.entity.js';
+import { Review } from '../../reviews/entities/review.entity.js';
 
 @Entity('users')
 export class User {

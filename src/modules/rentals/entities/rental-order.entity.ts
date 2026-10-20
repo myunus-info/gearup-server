@@ -9,12 +9,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { RentalStatus } from '../common/enums/rental-status.enum.js';
-import { User } from './user.entity.js';
+import { RentalStatus } from '../../../common/enums/rental-status.enum.js';
+import { User } from '../../auth/entities/user.entity.js';
 import { RentalOrderItem } from './rental-order-item.entity.js';
-import { Payment } from './payment.entity.js';
-import { Review } from './review.entity.js';
-import { numericTransformer } from './transformers.js';
+import { Payment } from '../../payments/entities/payment.entity.js';
+import { Review } from '../../reviews/entities/review.entity.js';
+import { numericTransformer } from '../../../common/transformers/numeric.transformer.js';
 
 @Entity('rental_orders')
 @Index(['customerId'])

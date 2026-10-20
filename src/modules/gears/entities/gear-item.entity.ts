@@ -9,12 +9,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { GearCondition } from '../common/enums/gear-condition.enum.js';
-import { User } from './user.entity.js';
-import { Category } from './category.entity.js';
-import { RentalOrderItem } from './rental-order-item.entity.js';
-import { Review } from './review.entity.js';
-import { numericTransformer } from './transformers.js';
+import { GearCondition } from '../../../common/enums/gear-condition.enum.js';
+import { User } from '../../auth/entities/user.entity.js';
+import { Category } from '../../categories/entities/category.entity.js';
+import { RentalOrderItem } from '../../rentals/entities/rental-order-item.entity.js';
+import { Review } from '../../reviews/entities/review.entity.js';
+import { numericTransformer } from '../../../common/transformers/numeric.transformer.js';
 
 @Entity('gear_items')
 @Index(['categoryId'])

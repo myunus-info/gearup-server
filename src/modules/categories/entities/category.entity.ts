@@ -5,7 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { GearItem } from './gear-item.entity.js';
+import { GearItem } from '../../gears/entities/gear-item.entity.js';
 
 @Entity('categories')
 export class Category {

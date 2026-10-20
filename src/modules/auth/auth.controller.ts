@@ -18,7 +18,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { handleCookies } from '../../common/utils/auth.util.js';
 import { Auth } from '../../common/decorators/auth.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import { User } from '../../entities/user.entity.js';
+import { User } from './entities/user.entity.js';
 
 @ApiTags('Authentication')
 @Controller('auth')

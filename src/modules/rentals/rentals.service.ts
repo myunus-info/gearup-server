@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
-import { RentalOrder } from '../../entities/rental-order.entity.js';
-import { RentalOrderItem } from '../../entities/rental-order-item.entity.js';
-import { GearItem } from '../../entities/gear-item.entity.js';
-import { Payment } from '../../entities/payment.entity.js';
-import { User } from '../../entities/user.entity.js';
+import { RentalOrder } from './entities/rental-order.entity.js';
+import { RentalOrderItem } from './entities/rental-order-item.entity.js';
+import { GearItem } from '../gears/entities/gear-item.entity.js';
+import { Payment } from '../payments/entities/payment.entity.js';
+import { User } from '../auth/entities/user.entity.js';
 import { RentalStatus } from '../../common/enums/rental-status.enum.js';
 import { PaymentStatus } from '../../common/enums/payment-status.enum.js';
 import { PaymentsService } from '../payments/payments.service.js';

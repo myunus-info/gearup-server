@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { GearItem } from '../../entities/gear-item.entity.js';
+import { GearItem } from './entities/gear-item.entity.js';
 import { QueryGearDto } from './dto/query-gear.dto.js';
 
 @Injectable()

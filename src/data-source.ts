@@ -1,15 +1,13 @@
 import dotenv from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import {
-  User,
-  ProviderProfile,
-  Category,
-  GearItem,
-  RentalOrder,
-  RentalOrderItem,
-  Payment,
-  Review,
-} from './entities/index.js';
+import { User } from './modules/auth/entities/user.entity.js';
+import { ProviderProfile } from './modules/auth/entities/provider-profile.entity.js';
+import { Category } from './modules/categories/entities/category.entity.js';
+import { GearItem } from './modules/gears/entities/gear-item.entity.js';
+import { RentalOrder } from './modules/rentals/entities/rental-order.entity.js';
+import { RentalOrderItem } from './modules/rentals/entities/rental-order-item.entity.js';
+import { Payment } from './modules/payments/entities/payment.entity.js';
+import { Review } from './modules/reviews/entities/review.entity.js';
 
 const environment = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${environment}` });

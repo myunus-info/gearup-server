@@ -8,9 +8,9 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { User } from './user.entity.js';
-import { GearItem } from './gear-item.entity.js';
-import { RentalOrder } from './rental-order.entity.js';
+import { User } from '../../auth/entities/user.entity.js';
+import { GearItem } from '../../gears/entities/gear-item.entity.js';
+import { RentalOrder } from '../../rentals/entities/rental-order.entity.js';
 
 @Entity('reviews')
 @Unique(['customerId', 'gearItemId', 'rentalOrderId'])

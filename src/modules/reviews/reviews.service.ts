@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Review } from '../../entities/review.entity.js';
-import { RentalOrder } from '../../entities/rental-order.entity.js';
+import { Review } from './entities/review.entity.js';
+import { RentalOrder } from '../rentals/entities/rental-order.entity.js';
 import { RentalStatus } from '../../common/enums/rental-status.enum.js';
 import { CreateReviewDto } from './dto/create-review.dto.js';
 

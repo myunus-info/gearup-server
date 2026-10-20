@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { Payment } from '../../entities/payment.entity.js';
-import { RentalOrder } from '../../entities/rental-order.entity.js';
+import { Payment } from './entities/payment.entity.js';
+import { RentalOrder } from '../rentals/entities/rental-order.entity.js';
 import { PaymentStatus } from '../../common/enums/payment-status.enum.js';
 import { RentalStatus } from '../../common/enums/rental-status.enum.js';
 import { SslcommerzService, PaymentUserData } from './sslcommerz.service.js';

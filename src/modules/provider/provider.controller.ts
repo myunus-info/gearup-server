@@ -18,7 +18,7 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto.js';
 import { Auth } from '../../common/decorators/auth.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Role } from '../../common/enums/role.enum.js';
-import { User } from '../../entities/user.entity.js';
+import { User } from '../auth/entities/user.entity.js';
 
 @ApiTags('Provider Dashboard')
 @Controller('provider')

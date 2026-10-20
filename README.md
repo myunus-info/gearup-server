@@ -36,27 +36,25 @@ gearup-server/
 │   │   ├── filters/            # AllExceptionsFilter (standard error envelope)
 │   │   ├── guards/             # JwtAuthGuard, RolesGuard
 │   │   ├── interceptors/       # LoggingInterceptor, TransformInterceptor (standard envelope)
+│   │   ├── transformers/       # numeric.transformer.ts (ValueTransformer)
 │   │   └── utils/              # auth.util.ts (handleCookies)
 │   ├── config/
 │   │   └── env.validation.ts   # class-validator environment validation
-│   ├── entities/               # TypeORM entity models
-│   │   ├── user.entity.ts
-│   │   ├── provider-profile.entity.ts
-│   │   ├── category.entity.ts
-│   │   ├── gear-item.entity.ts
-│   │   ├── rental-order.entity.ts
-│   │   ├── rental-order-item.entity.ts
-│   │   ├── payment.entity.ts
-│   │   └── review.entity.ts
 │   ├── modules/
 │   │   ├── auth/               # Signup, signin, refresh-token, signout, getMe
+│   │   │   └── entities/       # User, ProviderProfile
 │   │   ├── admin/              # User oversight, status toggle, platform audit
 │   │   ├── categories/         # Category CRUD
+│   │   │   └── entities/       # Category
 │   │   ├── gears/              # Public catalog search, filters, pagination
+│   │   │   └── entities/       # GearItem
 │   │   ├── provider/           # Provider gear inventory & order lifecycle
 │   │   ├── rentals/            # Customer rental orders & stock decrement
+│   │   │   └── entities/       # RentalOrder, RentalOrderItem
 │   │   ├── payments/           # SSLCommerz initiation & webhook confirmation
+│   │   │   └── entities/       # Payment
 │   │   └── reviews/            # Verified customer ratings & feedback
+│   │       └── entities/       # Review
 │   ├── data-source.ts          # TypeORM DataSource configuration
 │   ├── app.controller.ts       # Health checks & info
 │   ├── app.module.ts           # Root module configuration
