@@ -1,6 +1,6 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller.js';
@@ -8,6 +8,7 @@ import { AppService } from './app.service.js';
 import { validateEnv } from './config/env.validation.js';
 import { dataSourceOptions } from './data-source.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
+import { ThrottlerBehindProxyGuard } from './common/guards/throttler-behind-proxy.guard.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { CategoriesModule } from './modules/categories/categories.module.js';
@@ -60,7 +61,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module.js';
     },
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: ThrottlerBehindProxyGuard,
     },
     {
       provide: APP_INTERCEPTOR,

@@ -17,6 +17,7 @@ async function bootstrapServer() {
   }
 
   const expressApp = express();
+  expressApp.set('trust proxy', 1);
   const app = await NestFactory.create(
     AppModule,
     new ExpressAdapter(expressApp),
