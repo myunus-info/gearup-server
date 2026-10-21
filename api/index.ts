@@ -5,9 +5,9 @@ import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
-import { AppModule } from '../src/app.module.js';
-import { AllExceptionsFilter } from '../src/common/filters/http-exception.filter.js';
-import { LoggingInterceptor } from '../src/common/interceptors/logging.interceptor.js';
+import { AppModule } from '../dist/app.module.js';
+import { AllExceptionsFilter } from '../dist/common/filters/http-exception.filter.js';
+import { LoggingInterceptor } from '../dist/common/interceptors/logging.interceptor.js';
 
 let cachedServer: any;
 
