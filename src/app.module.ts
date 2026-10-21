@@ -26,6 +26,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module.js';
         `.env.${process.env.NODE_ENV || 'development'}`,
         '.env',
       ],
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
       validate: validateEnv,
     }),
     ThrottlerModule.forRoot([
