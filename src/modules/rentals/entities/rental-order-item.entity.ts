@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import {
+  BeforeInsert,
   Column,
   Entity,
   Index,
@@ -16,7 +18,14 @@ import { numericTransformer } from '../../../common/transformers/numeric.transfo
 @Index(['gearItemId'])
 export class RentalOrderItem {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: string = randomUUID();
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) {
+      this.id = randomUUID();
+    }
+  }
 
   @Column()
   rentalOrderId: string;

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   ConflictException,
   ForbiddenException,
@@ -50,6 +51,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
 
     const user = this.userRepository.create({
+      id: randomUUID(),
       name: dto.name,
       email: dto.email,
       password: hashedPassword,
@@ -61,6 +63,7 @@ export class AuthService {
 
     if (dto.role === Role.PROVIDER) {
       user.providerProfile = this.providerProfileRepository.create({
+        id: randomUUID(),
         shopName: dto.shopName || `${dto.name}'s Shop`,
       });
     }

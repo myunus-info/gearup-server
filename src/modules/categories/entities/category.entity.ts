@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -11,7 +13,14 @@ import { GearItem } from '../../gears/entities/gear-item.entity.js';
 @Entity('categories')
 export class Category {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: string = randomUUID();
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) {
+      this.id = randomUUID();
+    }
+  }
 
   @Column({ unique: true })
   name: string;
