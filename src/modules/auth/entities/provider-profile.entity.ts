@@ -6,7 +6,7 @@ import {
   Entity,
   JoinColumn,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
   type Relation,
 } from 'typeorm';
@@ -14,7 +14,7 @@ import { User } from './user.entity.js';
 
 @Entity('provider_profiles')
 export class ProviderProfile {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()

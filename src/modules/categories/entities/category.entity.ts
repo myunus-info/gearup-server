@@ -5,14 +5,14 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   type Relation,
 } from 'typeorm';
 import { GearItem } from '../../gears/entities/gear-item.entity.js';
 
 @Entity('categories')
 export class Category {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()

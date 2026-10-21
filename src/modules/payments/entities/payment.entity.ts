@@ -7,7 +7,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   type Relation,
 } from 'typeorm';
 import { PaymentProvider } from '../../../common/enums/payment-provider.enum.js';
@@ -18,7 +18,7 @@ import { numericTransformer } from '../../../common/transformers/numeric.transfo
 @Entity('payments')
 @Index(['rentalOrderId'])
 export class Payment {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()

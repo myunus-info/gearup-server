@@ -7,7 +7,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Unique,
   type Relation,
 } from 'typeorm';
@@ -19,7 +19,7 @@ import { RentalOrder } from '../../rentals/entities/rental-order.entity.js';
 @Unique(['customerId', 'gearItemId', 'rentalOrderId'])
 @Index(['gearItemId'])
 export class Review {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()

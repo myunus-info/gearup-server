@@ -6,7 +6,7 @@ import {
   Entity,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
   type Relation,
 } from 'typeorm';
@@ -19,7 +19,7 @@ import { Review } from '../../reviews/entities/review.entity.js';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()

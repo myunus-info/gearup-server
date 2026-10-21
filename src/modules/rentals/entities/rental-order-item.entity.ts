@@ -6,7 +6,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   type Relation,
 } from 'typeorm';
 import { RentalOrder } from './rental-order.entity.js';
@@ -17,7 +17,7 @@ import { numericTransformer } from '../../../common/transformers/numeric.transfo
 @Index(['rentalOrderId'])
 @Index(['gearItemId'])
 export class RentalOrderItem {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()

@@ -8,7 +8,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
   type Relation,
 } from 'typeorm';
@@ -23,7 +23,7 @@ import { numericTransformer } from '../../../common/transformers/numeric.transfo
 @Index(['categoryId'])
 @Index(['providerId'])
 export class GearItem {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()

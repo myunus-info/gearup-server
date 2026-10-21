@@ -8,7 +8,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
   type Relation,
 } from 'typeorm';
@@ -22,7 +22,7 @@ import { numericTransformer } from '../../../common/transformers/numeric.transfo
 @Entity('rental_orders')
 @Index(['customerId'])
 export class RentalOrder {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string = randomUUID();
 
   @BeforeInsert()
