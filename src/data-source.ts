@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import pg from 'pg';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { User } from './modules/auth/entities/user.entity.js';
 import { ProviderProfile } from './modules/auth/entities/provider-profile.entity.js';
@@ -31,6 +32,7 @@ export const getDataSourceOptions = (): DataSourceOptions => {
     return {
       type: 'postgres',
       url: databaseUrl,
+      driver: pg,
       entities: allEntities,
       migrations: ['dist/migrations/*.js'],
       migrationsRun: false,
