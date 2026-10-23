@@ -19,12 +19,27 @@ async function bootstrap() {
 
   // Security & Cross-Origin (Configured for Next.js ofetch credentials: "include")
   const isProduction = configService.get<string>('NODE_ENV') === 'production';
-  const appUrl = configService.get<string>('APP_URL');
+  const appUrl = configService.get<string>('CLIENT_URL');
+  const allowedOrigins = [
+    appUrl,
+    appUrl?.replace(/\/$/, ''),
+    'https://gearup-nestjs-server.vercel.app',
+  ].filter(Boolean) as string[];
+
+  const extraOrigins = (appUrl || '')
+    .split(',')
+    .map(u => u.trim().replace(/\/$/, ''))
+    .filter(Boolean);
 
   app.enableCors({
     origin: isProduction
       ? (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-          if (!origin || origin === appUrl) {
+          if (
+            !origin ||
+            allowedOrigins.includes(origin) ||
+            extraOrigins.includes(origin) ||
+            origin.endsWith('.vercel.app')
+          ) {
             callback(null, true);
           } else {
             callback(new Error('Not allowed by CORS'));
@@ -56,9 +71,10 @@ async function bootstrap() {
     .addTag('Gears (Public Catalog)', 'Browse and filter available gear items')
     .addTag('Provider Dashboard', 'Inventory and order management for equipment providers')
     .addTag('Rentals (Orders)', 'Order placement, calculations, and tracking')
-    .addTag('Payments', 'SSLCommerz payment processing and webhooks')
+    .addTag('Payments', 'Stripe & SSLCommerz payment processing and webhooks')
     .addTag('Reviews', 'Verified ratings and customer feedback')
     .addTag('Admin Oversight', 'Administrative controls for users, listings, and orders')
+    .addTag('AI Concierge', 'Intelligent conversational assistant grounded in real-time gear inventory')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

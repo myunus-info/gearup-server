@@ -152,7 +152,7 @@ describe('PaymentsService & PaymentGatewayFactory (Separation of Concerns)', () 
 
       expect(mockStripeGateway.verifyPayment).toHaveBeenCalled();
       expect(result.payment.status).toBe(PaymentStatus.PAID);
-      expect(result.order.status).toBe(RentalStatus.CONFIRMED);
+      expect(result.order?.status).toBe(RentalStatus.CONFIRMED);
     });
   });
 });

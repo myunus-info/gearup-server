@@ -47,7 +47,7 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  APP_URL: string = 'http://localhost:3000';
+  CLIENT_URL: string = 'https://gearup-six-kohl.vercel.app';
 
   @IsNumber()
   @IsOptional()
@@ -64,15 +64,15 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  SUCCESS_URL: string = 'http://localhost:3000/payment/success';
+  SUCCESS_URL: string = 'https://gearup-six-kohl.vercel.app/payment/success';
 
   @IsString()
   @IsOptional()
-  FAIL_URL: string = 'http://localhost:3000/payment/fail';
+  FAIL_URL: string = 'https://gearup-six-kohl.vercel.app/payment/fail';
 
   @IsString()
   @IsOptional()
-  CANCEL_URL: string = 'http://localhost:3000/payment/cancel';
+  CANCEL_URL: string = 'https://gearup-six-kohl.vercel.app/payment/cancel';
 
   @IsString()
   @IsOptional()

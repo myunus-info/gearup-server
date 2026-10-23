@@ -47,7 +47,7 @@ export class StripeGateway implements IPaymentGateway {
 
   async initiatePayment(customer: PaymentCustomerData, order: PaymentOrderData): Promise<string> {
     const stripe = this.getStripeClient();
-    const appUrl = this.configService.get<string>('APP_URL') || 'http://localhost:3000';
+    const appUrl = this.configService.get<string>('CLIENT_URL') || 'https://gearup-six-kohl.vercel.app';
     const successUrl = `${appUrl}/payment/success?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}&gateway=STRIPE`;
     const cancelUrl = `${appUrl}/payment/cancel?orderId=${order.id}&gateway=STRIPE`;
 
@@ -57,8 +57,7 @@ export class StripeGateway implements IPaymentGateway {
         ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ')
         : 'Outdoor Equipment Rental';
 
-    const isValidEmail =
-      customer.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email.trim());
+    const isValidEmail = customer.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email.trim());
 
     try {
       const session = await stripe.checkout.sessions.create({
@@ -94,18 +93,13 @@ export class StripeGateway implements IPaymentGateway {
       return session.url;
     } catch (error: any) {
       this.logger.error(`Stripe checkout creation failed: ${error?.message}`);
-      throw new BadRequestException(
-        `Stripe Error: ${error?.message || 'Failed to initialize payment gateway'}`,
-      );
+      throw new BadRequestException(`Stripe Error: ${error?.message || 'Failed to initialize payment gateway'}`);
     }
   }
 
   async verifyPayment(dto: ConfirmPaymentDto): Promise<PaymentVerificationResult> {
     const sessionId =
-      dto.sessionId ||
-      dto.tranId ||
-      (dto.payload?.session_id as string) ||
-      (dto.payload?.sessionId as string);
+      dto.sessionId || dto.tranId || (dto.payload?.session_id as string) || (dto.payload?.sessionId as string);
 
     if (!sessionId) {
       throw new BadRequestException('Stripe checkout session_id is required for verification.');
@@ -130,7 +124,10 @@ export class StripeGateway implements IPaymentGateway {
     }
   }
 
-  processWebhook(payload: any, signature?: string): { orderId?: string; sessionId?: string; tranId?: string; rawEvent: any } {
+  processWebhook(
+    payload: any,
+    signature?: string,
+  ): { orderId?: string; sessionId?: string; tranId?: string; rawEvent: any } {
     let event: any = payload;
 
     if (signature) {
