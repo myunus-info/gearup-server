@@ -34,15 +34,21 @@ async function bootstrap() {
   app.enableCors({
     origin: isProduction
       ? (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+          const isGatewayOrigin =
+            origin &&
+            (origin.includes('sslcommerz.com') ||
+              origin.includes('stripe.com'));
+
           if (
             !origin ||
             allowedOrigins.includes(origin) ||
             extraOrigins.includes(origin) ||
-            origin.endsWith('.vercel.app')
+            origin.endsWith('.vercel.app') ||
+            isGatewayOrigin
           ) {
             callback(null, true);
           } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(null, false);
           }
         }
       : true,

@@ -33,16 +33,13 @@ export class SslcommerzGateway implements IPaymentGateway {
       this.configService.get<string>('SERVER_URL') ||
       defaultBackendUrl;
 
-    // Approach B (Industry Standard): Gateway callbacks point to NestJS backend endpoints
-    const successCallbackUrl =
-      this.configService.get<string>('SSL_SUCCESS_CALLBACK_URL') ||
-      `${backendUrl}/api/v1/payments/sslcommerz/success`;
-    const failCallbackUrl =
-      this.configService.get<string>('SSL_FAIL_CALLBACK_URL') ||
-      `${backendUrl}/api/v1/payments/sslcommerz/fail`;
-    const cancelCallbackUrl =
-      this.configService.get<string>('SSL_CANCEL_CALLBACK_URL') ||
-      `${backendUrl}/api/v1/payments/sslcommerz/cancel`;
+    const clientUrl =
+      this.configService.get<string>('CLIENT_URL') || 'https://gearup-six-kohl.vercel.app';
+
+    // Frontend URLs handled seamlessly by Next.js Edge Middleware (converts POST to GET via HTTP 303)
+    const successUrl = `${clientUrl}/payment/success`;
+    const failUrl = `${clientUrl}/payment/fail`;
+    const cancelUrl = `${clientUrl}/payment/cancel`;
     const ipnUrl =
       this.configService.get<string>('SSL_IPN_URL') ||
       `${backendUrl}/api/v1/payments/sslcommerz/ipn`;
@@ -55,9 +52,9 @@ export class SslcommerzGateway implements IPaymentGateway {
       total_amount: order.totalAmount,
       currency: 'BDT',
       tran_id: transId,
-      success_url: `${successCallbackUrl}?orderId=${order.id}&tranId=${transId}`,
-      fail_url: `${failCallbackUrl}?orderId=${order.id}&tranId=${transId}`,
-      cancel_url: `${cancelCallbackUrl}?orderId=${order.id}&tranId=${transId}`,
+      success_url: `${successUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=success`,
+      fail_url: `${failUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=fail`,
+      cancel_url: `${cancelUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=cancel`,
       ipn_url: ipnUrl,
       shipping_method: 'N/A',
       product_name: 'Gear Rental Order',
@@ -105,9 +102,8 @@ export class SslcommerzGateway implements IPaymentGateway {
       );
     }
 
-    // Reliable sandbox fallback if SSLCommerz testbox is rate-limited or unreachable:
-    // Route through backend callback so the order is confirmed and redirected to frontend cleanly
-    return `${successCallbackUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=success&simulated=true`;
+    // Reliable sandbox fallback if SSLCommerz testbox is rate-limited or unreachable
+    return `${successUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=success&simulated=true`;
   }
 
   async verifyPayment(dto: ConfirmPaymentDto): Promise<PaymentVerificationResult> {
