@@ -1,6 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import crypto from 'node:crypto';
 import Stripe from 'stripe';
 import { PaymentProvider } from '../../common/enums/payment-provider.enum.js';
 import type {
@@ -14,7 +13,7 @@ import type {
 export class StripeService implements IPaymentGateway {
   readonly provider = PaymentProvider.STRIPE;
   private readonly logger = new Logger(StripeService.name);
-  private readonly stripe: Stripe | null = null;
+  private stripe: Stripe | null = null;
   private readonly webhookSecret: string | null = null;
 
   constructor(private readonly configService: ConfigService) {
@@ -25,70 +24,76 @@ export class StripeService implements IPaymentGateway {
       this.stripe = new Stripe(secretKey, {
         apiVersion: '2025-02-24.acacia' as any,
       });
-      this.logger.log('Stripe SDK initialized successfully with active API secret key.');
+      this.logger.log('Stripe SDK initialized with active API secret key.');
     } else {
-      this.logger.warn('Stripe secret key missing or invalid. Running in sandbox simulation mode.');
+      this.logger.warn('Stripe secret key is not set or invalid.');
     }
   }
 
   async initiatePayment(customer: PaymentCustomerData, order: PaymentOrderData): Promise<string> {
+    if (!this.stripe) {
+      // Re-check config in case it was loaded dynamically
+      const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+      if (secretKey && (secretKey.startsWith('sk_test_') || secretKey.startsWith('sk_live_'))) {
+        this.stripe = new Stripe(secretKey, { apiVersion: '2025-02-24.acacia' as any });
+      } else {
+        throw new BadRequestException(
+          'Stripe is not configured on the server. Please add STRIPE_SECRET_KEY to your environment variables.',
+        );
+      }
+    }
+
     const appUrl = this.configService.get<string>('APP_URL') || 'http://localhost:3000';
     const successUrl = `${appUrl}/payment/success?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}&gateway=STRIPE`;
     const cancelUrl = `${appUrl}/payment/cancel?orderId=${order.id}&gateway=STRIPE`;
 
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+    const totalCents = Math.max(50, Math.round(Number(order.totalAmount) * 100));
+    const itemsDescription =
       order.items && order.items.length > 0
-        ? order.items.map(item => ({
+        ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ')
+        : 'Outdoor Equipment Rental';
+
+    const isValidEmail =
+      customer.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email.trim());
+
+    try {
+      const session = await this.stripe.checkout.sessions.create({
+        mode: 'payment',
+        customer_email: isValidEmail ? customer.email?.trim() : undefined,
+        line_items: [
+          {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: item.name,
+                name: `GearUp Rental #${order.id.slice(-8)}`,
+                description: itemsDescription,
               },
-              unit_amount: Math.max(50, Math.round(item.unitPrice * 100)),
+              unit_amount: totalCents,
             },
-            quantity: Math.max(1, item.quantity),
-          }))
-        : [
-            {
-              price_data: {
-                currency: 'usd',
-                product_data: {
-                  name: `GearUp Rental #${order.id.slice(-8)}`,
-                  description: `Equipment rental order #${order.id}`,
-                },
-                unit_amount: Math.max(50, Math.round(order.totalAmount * 100)),
-              },
-              quantity: 1,
-            },
-          ];
-
-    if (this.stripe) {
-      try {
-        const session = await this.stripe.checkout.sessions.create({
-          mode: 'payment',
-          customer_email: customer.email || undefined,
-          line_items: lineItems,
-          client_reference_id: order.id,
-          metadata: {
-            orderId: order.id,
-            customerId: customer.id || '',
+            quantity: 1,
           },
-          success_url: successUrl,
-          cancel_url: cancelUrl,
-        });
+        ],
+        client_reference_id: order.id,
+        metadata: {
+          orderId: order.id,
+          customerId: customer.id || '',
+        },
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      });
 
-        if (session.url) {
-          this.logger.log(`Created Stripe Checkout session: ${session.id} for order ${order.id}`);
-          return session.url;
-        }
-      } catch (error: any) {
-        this.logger.error(`Stripe checkout creation failed: ${error?.message}. Falling back to simulation.`);
+      if (!session.url) {
+        throw new BadRequestException('Stripe failed to return a checkout session URL.');
       }
-    }
 
-    // Simulation / local testing fallback
-    const simulatedSessionId = `cs_test_${crypto.randomUUID()}`;
-    return `${appUrl}/payment/success?orderId=${order.id}&session_id=${simulatedSessionId}&gateway=STRIPE`;
+      this.logger.log(`Created Stripe Checkout session: ${session.id} for order ${order.id}`);
+      return session.url;
+    } catch (error: any) {
+      this.logger.error(`Stripe checkout creation failed: ${error?.message}`);
+      throw new BadRequestException(
+        `Stripe Error: ${error?.message || 'Failed to initialize payment gateway'}`,
+      );
+    }
   }
 
   async verifyPayment(verificationId: string): Promise<PaymentVerificationResult> {
@@ -96,7 +101,14 @@ export class StripeService implements IPaymentGateway {
       return { isPaid: false };
     }
 
-    if (this.stripe && verificationId.startsWith('cs_') && !verificationId.includes('fallback')) {
+    if (!this.stripe) {
+      const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+      if (secretKey) {
+        this.stripe = new Stripe(secretKey, { apiVersion: '2025-02-24.acacia' as any });
+      }
+    }
+
+    if (this.stripe) {
       try {
         const session = await this.stripe.checkout.sessions.retrieve(verificationId);
         const isPaid = session.payment_status === 'paid' || session.status === 'complete';
@@ -114,22 +126,12 @@ export class StripeService implements IPaymentGateway {
       }
     }
 
-    // Graceful handling for test simulation tokens
-    if (verificationId.startsWith('cs_test_')) {
-      return {
-        isPaid: true,
-        transactionId: verificationId,
-        method: 'STRIPE_TEST_CARD',
-        rawResponse: { status: 'complete', sessionId: verificationId },
-      };
-    }
-
     return { isPaid: false };
   }
 
   constructWebhookEvent(payload: Buffer | string, signature: string): Stripe.Event {
     if (!this.stripe || !this.webhookSecret) {
-      throw new Error('Stripe or Webhook Secret is not configured on the server.');
+      throw new Error('Stripe Webhook Secret is not configured on the server.');
     }
     return this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret);
   }
