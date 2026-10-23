@@ -72,18 +72,6 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  SUCCESS_URL: string = 'https://gearup-six-kohl.vercel.app/payment/success';
-
-  @IsString()
-  @IsOptional()
-  FAIL_URL: string = 'https://gearup-six-kohl.vercel.app/payment/fail';
-
-  @IsString()
-  @IsOptional()
-  CANCEL_URL: string = 'https://gearup-six-kohl.vercel.app/payment/cancel';
-
-  @IsString()
-  @IsOptional()
   SSL_PAYMENT_API: string = 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php';
 
   @IsString()

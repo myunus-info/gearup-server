@@ -38,10 +38,7 @@ async function bootstrapServer(): Promise<express.Express> {
   app.enableCors({
     origin: isProduction
       ? (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-          const isGatewayOrigin =
-            origin &&
-            (origin.includes('sslcommerz.com') ||
-              origin.includes('stripe.com'));
+          const isGatewayOrigin = origin && (origin.includes('sslcommerz.com') || origin.includes('stripe.com'));
 
           if (
             !origin ||
