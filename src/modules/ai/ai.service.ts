@@ -236,4 +236,93 @@ CRITICAL: Return valid JSON with this exact schema:
       model: 'heuristic-engine',
     };
   }
+
+  async getSearchSuggestions(query = '') {
+    const trimmed = query.trim().toLowerCase();
+
+    const allGears = await this.gearRepository.find({
+      where: { isActive: true },
+      relations: { category: true },
+      take: 50,
+    });
+
+    const inStockGears = allGears.filter((g) => (g.quantityAvailable ?? 0) > 0);
+
+    const defaultCuratedSuggestions = [
+      {
+        term: 'Tent',
+        label: 'Alpine Backpacking Tents',
+        category: 'Camping & Hiking',
+      },
+      {
+        term: 'Kayak',
+        label: 'Touring Kayaks & Water Equipment',
+        category: 'Water Sports',
+      },
+      {
+        term: 'Drone',
+        label: '4K Aerial Action Drones',
+        category: 'Photography & Drone Gear',
+      },
+      {
+        term: 'Backpack',
+        label: 'Expedition Trekking Packs',
+        category: 'Camping & Hiking',
+      },
+      {
+        term: 'Mountain Bike',
+        label: 'Full Suspension Mountain Bikes',
+        category: 'Cycling & Mountain Biking',
+      },
+      {
+        term: 'Harness',
+        label: 'Climbing Ropes & Harness Kits',
+        category: 'Climbing & Mountaineering',
+      },
+      {
+        term: 'Snowboard',
+        label: 'All-Mountain Snowboards',
+        category: 'Winter Sports',
+      },
+      {
+        term: 'Paddleboard',
+        label: 'Inflatable SUP Touring Boards',
+        category: 'Water Sports',
+      },
+    ];
+
+    let matchingGears: GearItem[] = [];
+    let suggestions = defaultCuratedSuggestions;
+
+    if (trimmed) {
+      matchingGears = inStockGears
+        .filter(
+          (g) =>
+            g.name.toLowerCase().includes(trimmed) ||
+            g.category?.name?.toLowerCase().includes(trimmed) ||
+            g.brand?.toLowerCase().includes(trimmed),
+        )
+        .slice(0, 5);
+
+      suggestions = defaultCuratedSuggestions.filter(
+        (s) =>
+          s.term.toLowerCase().includes(trimmed) ||
+          s.label.toLowerCase().includes(trimmed) ||
+          s.category.toLowerCase().includes(trimmed),
+      );
+    }
+
+    return {
+      query,
+      suggestions: suggestions.slice(0, 6),
+      matchingGears: matchingGears.map((g) => ({
+        id: g.id,
+        name: g.name,
+        brand: g.brand,
+        pricePerDay: Number(g.pricePerDay),
+        images: g.images || [],
+        category: g.category?.name || 'Outdoor Gear',
+      })),
+    };
+  }
 }
