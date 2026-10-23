@@ -1,4 +1,5 @@
 import { PaymentProvider } from '../../../common/enums/payment-provider.enum.js';
+import type { ConfirmPaymentDto } from '../dto/confirm-payment.dto.js';
 
 export interface PaymentCustomerData {
   id?: string;
@@ -32,5 +33,5 @@ export interface PaymentVerificationResult {
 export interface IPaymentGateway {
   readonly provider: PaymentProvider;
   initiatePayment(customer: PaymentCustomerData, order: PaymentOrderData): Promise<string>;
-  verifyPayment(verificationId: string): Promise<PaymentVerificationResult>;
+  verifyPayment(dto: ConfirmPaymentDto): Promise<PaymentVerificationResult>;
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service.js';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto.js';
@@ -36,15 +36,6 @@ export class PaymentsController {
       message: 'Payment confirmed successfully',
       data: result,
     };
-  }
-
-  @Post(['stripe/webhook', 'webhook'])
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Stripe webhook listener for asynchronous checkout confirmation' })
-  @ApiResponse({ status: 200, description: 'Webhook event received and processed' })
-  async handleStripeWebhook(@Body() body: any, @Headers('stripe-signature') signature?: string) {
-    const result = await this.paymentsService.handleStripeWebhook(body, signature);
-    return result;
   }
 
   @Get()
