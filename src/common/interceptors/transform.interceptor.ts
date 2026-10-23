@@ -19,6 +19,11 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
 
     return next.handle().pipe(
       map(result => {
+        // If response headers have already been sent (e.g. manual redirect), do not modify
+        if (response.headersSent) {
+          return result;
+        }
+
         const statusCode = response.statusCode || 200;
 
         // If result is already formatted as ApiResponse, return it directly

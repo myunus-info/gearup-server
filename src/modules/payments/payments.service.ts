@@ -211,6 +211,31 @@ export class PaymentsService {
   }
 
   /**
+   * Record a failed or canceled payment attempt
+   */
+  async recordFailedPayment(
+    orderId: string,
+    tranId?: string,
+    rawResponse?: Record<string, unknown>,
+  ): Promise<void> {
+    const payment = await this.paymentRepository.findOne({
+      where: { rentalOrderId: orderId },
+    });
+
+    if (payment && payment.status !== PaymentStatus.PAID) {
+      payment.status = PaymentStatus.FAILED;
+      if (tranId) {
+        payment.transactionId = tranId;
+      }
+      if (rawResponse) {
+        payment.gatewayResponse = rawResponse;
+      }
+      await this.paymentRepository.save(payment);
+      this.logger.warn(`Updated payment status to FAILED for order ${orderId}`);
+    }
+  }
+
+  /**
    * Get payments history for a customer
    */
   async getMyPayments(customerId: string): Promise<Payment[]> {

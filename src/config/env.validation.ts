@@ -49,6 +49,14 @@ export class EnvironmentVariables {
   @IsOptional()
   CLIENT_URL: string = 'https://gearup-six-kohl.vercel.app';
 
+  @IsString()
+  @IsOptional()
+  BACKEND_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  SERVER_URL?: string;
+
   @IsNumber()
   @IsOptional()
   @Transform(({ value }) => Number(value))
