@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AiService } from './ai.service.js';
 import { ChatRequestDto } from './dto/chat-request.dto.js';
@@ -19,8 +11,7 @@ export class AiController {
   @Post('chat')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary:
-      'AI Adventure Concierge - Process natural language advice & recommend in-stock gear',
+    summary: 'AI Adventure Concierge - Process natural language advice & recommend in-stock gear',
   })
   @ApiResponse({
     status: 200,
@@ -32,8 +23,7 @@ export class AiController {
 
   @Get('search-suggestions')
   @ApiOperation({
-    summary:
-      'AI Smart Search Suggestions - Query popular equipment and direct product matches',
+    summary: 'AI Smart Search Suggestions - Query popular equipment and direct product matches',
   })
   @ApiResponse({
     status: 200,

@@ -13,12 +13,12 @@ describe('AuthService', () => {
   beforeEach(() => {
     mockUserRepo = {
       findOne: vi.fn(),
-      create: vi.fn((data) => ({ ...data, id: 'user-uuid-1' })),
-      save: vi.fn((data) => Promise.resolve({ ...data, id: 'user-uuid-1' })),
+      create: vi.fn(data => ({ ...data, id: 'user-uuid-1' })),
+      save: vi.fn(data => Promise.resolve({ ...data, id: 'user-uuid-1' })),
       createQueryBuilder: vi.fn(),
     };
     mockProfileRepo = {
-      create: vi.fn((data) => ({ ...data, id: 'profile-uuid-1' })),
+      create: vi.fn(data => ({ ...data, id: 'profile-uuid-1' })),
     };
     mockJwtService = {
       sign: vi.fn(() => 'mock-jwt-token'),
@@ -33,12 +33,7 @@ describe('AuthService', () => {
       }),
     };
 
-    service = new AuthService(
-      mockUserRepo,
-      mockProfileRepo,
-      mockJwtService,
-      mockConfigService,
-    );
+    service = new AuthService(mockUserRepo, mockProfileRepo, mockJwtService, mockConfigService);
   });
 
   it('registers a customer successfully', async () => {

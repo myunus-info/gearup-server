@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RentalsService } from './rentals.service.js';
 import { CreateRentalDto } from './dto/create-rental.dto.js';
@@ -25,10 +17,7 @@ export class RentalsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new rental order & initiate payment session' })
   @ApiResponse({ status: 201, description: 'Rental order placed successfully' })
-  async createRentalOrder(
-    @Body() dto: CreateRentalDto,
-    @CurrentUser() user: User,
-  ) {
+  async createRentalOrder(@Body() dto: CreateRentalDto, @CurrentUser() user: User) {
     const result = await this.rentalsService.createRentalOrder(dto, user);
     return {
       message: 'Rental order placed successfully',
@@ -50,10 +39,7 @@ export class RentalsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get rental order details by ID' })
   @ApiResponse({ status: 200, description: 'Rental order retrieved' })
-  async getRentalOrderById(
-    @Param('id') id: string,
-    @CurrentUser() user: User,
-  ) {
+  async getRentalOrderById(@Param('id') id: string, @CurrentUser() user: User) {
     const order = await this.rentalsService.getRentalOrderById(id, user.id);
     return {
       message: 'Rental order retrieved successfully',

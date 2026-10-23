@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../enums/role.enum.js';
 import { UserStatus } from '../enums/user-status.enum.js';
@@ -38,9 +33,7 @@ export class RolesGuard implements CanActivate {
 
     if (!hasPermission) {
       throw new ForbiddenException(
-        `Forbidden! You do not have permission to perform this action. Required role: [${requiredRoles.join(
-          ', ',
-        )}]`,
+        `Forbidden! You do not have permission to perform this action. Required role: [${requiredRoles.join(', ')}]`,
       );
     }
 

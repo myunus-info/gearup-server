@@ -65,17 +65,17 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => ProviderProfile, (profile) => profile.user, {
+  @OneToOne(() => ProviderProfile, profile => profile.user, {
     cascade: true,
   })
   providerProfile?: Relation<ProviderProfile>;
 
-  @OneToMany(() => GearItem, (gear) => gear.provider)
+  @OneToMany(() => GearItem, gear => gear.provider)
   gearItems: Relation<GearItem[]>;
 
-  @OneToMany(() => RentalOrder, (order) => order.customer)
+  @OneToMany(() => RentalOrder, order => order.customer)
   rentalOrders: Relation<RentalOrder[]>;
 
-  @OneToMany(() => Review, (review) => review.customer)
+  @OneToMany(() => Review, review => review.customer)
   reviews: Relation<Review[]>;
 }

@@ -1,11 +1,5 @@
 import { plainToInstance, Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  validateSync,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
 
 export enum Environment {
   Development = 'development',
@@ -103,18 +97,12 @@ export function validateEnv(config: Record<string, unknown>) {
   }
 
   if (validated.NODE_ENV === Environment.Production) {
-    if (
-      !validated.JWT_SECRET ||
-      validated.JWT_SECRET === 'gearUpDefaultSecretKey12345'
-    ) {
+    if (!validated.JWT_SECRET || validated.JWT_SECRET === 'gearUpDefaultSecretKey12345') {
       throw new Error(
         'Insecure configuration: JWT_SECRET must be explicitly defined and cannot use default fallback in production!',
       );
     }
-    if (
-      !validated.JWT_REFRESH_SECRET ||
-      validated.JWT_REFRESH_SECRET === 'gearUpDefaultRefreshSecretKey12345'
-    ) {
+    if (!validated.JWT_REFRESH_SECRET || validated.JWT_REFRESH_SECRET === 'gearUpDefaultRefreshSecretKey12345') {
       throw new Error(
         'Insecure configuration: JWT_REFRESH_SECRET must be explicitly defined and cannot use default fallback in production!',
       );

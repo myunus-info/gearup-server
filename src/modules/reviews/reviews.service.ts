@@ -40,19 +40,13 @@ export class ReviewsService {
     }
 
     if (order.status !== RentalStatus.RETURNED) {
-      throw new BadRequestException(
-        'You can only review gear after the rental has been returned',
-      );
+      throw new BadRequestException('You can only review gear after the rental has been returned');
     }
 
-    const rentedThisGear = order.items.some(
-      (item) => item.gearItemId === dto.gearItemId,
-    );
+    const rentedThisGear = order.items.some(item => item.gearItemId === dto.gearItemId);
 
     if (!rentedThisGear) {
-      throw new BadRequestException(
-        'This gear item was not part of the specified rental order',
-      );
+      throw new BadRequestException('This gear item was not part of the specified rental order');
     }
 
     const existing = await this.reviewRepository.findOne({
@@ -64,9 +58,7 @@ export class ReviewsService {
     });
 
     if (existing) {
-      throw new ConflictException(
-        'You have already reviewed this gear item for this rental order',
-      );
+      throw new ConflictException('You have already reviewed this gear item for this rental order');
     }
 
     const review = this.reviewRepository.create({

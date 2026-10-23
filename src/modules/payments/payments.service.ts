@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity.js';
@@ -23,10 +19,7 @@ export class PaymentsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async initiatePayment(
-    user: PaymentUserData,
-    order: { id: string; totalAmount: number },
-  ): Promise<string> {
+  async initiatePayment(user: PaymentUserData, order: { id: string; totalAmount: number }): Promise<string> {
     return this.sslcommerzService.initPayment(user, order);
   }
 
@@ -36,7 +29,7 @@ export class PaymentsService {
     const valId = payload?.val_id || `VAL-${Date.now()}`;
     const verificationResponse = await this.sslcommerzService.verifyPayment(valId);
 
-    const result = await this.dataSource.transaction(async (manager) => {
+    const result = await this.dataSource.transaction(async manager => {
       const payment = await manager.findOne(Payment, {
         where: { rentalOrderId: orderId },
       });

@@ -1,9 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { Response } from 'express';
@@ -23,7 +18,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
     const response = ctx.getResponse<Response>();
 
     return next.handle().pipe(
-      map((result) => {
+      map(result => {
         const statusCode = response.statusCode || 200;
 
         // If result is already formatted as ApiResponse, return it directly

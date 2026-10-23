@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AdminService } from './admin.service.js';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto.js';
@@ -34,11 +27,7 @@ export class AdminController {
   @Patch('users/:id')
   @ApiOperation({ summary: 'Update user status (ACTIVE / SUSPENDED) (Admin)' })
   @ApiResponse({ status: 200, description: 'User status updated successfully' })
-  async updateUserStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateUserStatusDto,
-    @CurrentUser() admin: User,
-  ) {
+  async updateUserStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto, @CurrentUser() admin: User) {
     if (admin.id === id) {
       throw new BadRequestException('Admins cannot change their own status');
     }

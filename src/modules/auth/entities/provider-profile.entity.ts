@@ -42,7 +42,7 @@ export class ProviderProfile {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => User, (user) => user.providerProfile, {
+  @OneToOne(() => User, user => user.providerProfile, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })

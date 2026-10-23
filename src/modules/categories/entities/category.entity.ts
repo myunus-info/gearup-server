@@ -1,13 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import {
-  BeforeInsert,
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryColumn,
-  type Relation,
-} from 'typeorm';
+import { BeforeInsert, Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, type Relation } from 'typeorm';
 import { GearItem } from '../../gears/entities/gear-item.entity.js';
 
 @Entity('categories')
@@ -31,6 +23,6 @@ export class Category {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => GearItem, (gear) => gear.category)
+  @OneToMany(() => GearItem, gear => gear.category)
   gearItems: Relation<GearItem[]>;
 }

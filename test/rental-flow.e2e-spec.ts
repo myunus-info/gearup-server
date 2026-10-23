@@ -119,9 +119,7 @@ describe('Gear Rental & Order Lifecycle (E2E)', () => {
   });
 
   it('Gear stock decremented after order is placed', async () => {
-    const res = await request(app.getHttpServer())
-      .get(`/api/v1/gears/${gearItemId}`)
-      .expect(200);
+    const res = await request(app.getHttpServer()).get(`/api/v1/gears/${gearItemId}`).expect(200);
 
     expect(res.body.data.quantityAvailable).toBe(3); // 5 - 2 = 3
   });
@@ -173,9 +171,7 @@ describe('Gear Rental & Order Lifecycle (E2E)', () => {
   });
 
   it('Gear stock restored after order RETURNED', async () => {
-    const res = await request(app.getHttpServer())
-      .get(`/api/v1/gears/${gearItemId}`)
-      .expect(200);
+    const res = await request(app.getHttpServer()).get(`/api/v1/gears/${gearItemId}`).expect(200);
 
     expect(res.body.data.quantityAvailable).toBe(5); // Restored back to 5!
   });

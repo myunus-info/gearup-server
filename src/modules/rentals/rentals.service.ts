@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { RentalOrder } from './entities/rental-order.entity.js';
@@ -62,18 +57,16 @@ export class RentalsService {
     // Consolidate duplicate item entries in request
     const aggregatedMap = new Map<string, number>();
     for (const item of dto.items) {
-      aggregatedMap.set(
-        item.gearItemId,
-        (aggregatedMap.get(item.gearItemId) || 0) + item.quantity,
-      );
+      aggregatedMap.set(item.gearItemId, (aggregatedMap.get(item.gearItemId) || 0) + item.quantity);
     }
-    const consolidatedItems = Array.from(aggregatedMap.entries()).map(
-      ([gearItemId, quantity]) => ({ gearItemId, quantity }),
-    );
+    const consolidatedItems = Array.from(aggregatedMap.entries()).map(([gearItemId, quantity]) => ({
+      gearItemId,
+      quantity,
+    }));
 
     // 1. Atomically create order, items, and pending payment inside DB transaction
-    const savedOrder = await this.dataSource.transaction(async (manager) => {
-      const gearIds = consolidatedItems.map((i) => i.gearItemId);
+    const savedOrder = await this.dataSource.transaction(async manager => {
+      const gearIds = consolidatedItems.map(i => i.gearItemId);
       const gearItems = await manager.find(GearItem, {
         where: { id: In(gearIds) },
       });
@@ -86,12 +79,10 @@ export class RentalsService {
       const orderItemsToCreate: Array<Partial<RentalOrderItem>> = [];
 
       for (const reqItem of consolidatedItems) {
-        const gear = gearItems.find((g) => g.id === reqItem.gearItemId);
+        const gear = gearItems.find(g => g.id === reqItem.gearItemId);
 
         if (!gear || !gear.isActive) {
-          throw new BadRequestException(
-            `Gear item "${gear?.name || reqItem.gearItemId}" is no longer available`,
-          );
+          throw new BadRequestException(`Gear item "${gear?.name || reqItem.gearItemId}" is no longer available`);
         }
 
         // Concurrency-safe atomic conditional stock decrement
@@ -136,7 +127,7 @@ export class RentalsService {
       const persistedOrder = await manager.save(RentalOrder, order);
 
       // Create order items
-      const items = orderItemsToCreate.map((item) =>
+      const items = orderItemsToCreate.map(item =>
         manager.create(RentalOrderItem, {
           ...item,
           rentalOrderId: persistedOrder.id,
@@ -205,10 +196,7 @@ export class RentalsService {
     return orders;
   }
 
-  async getRentalOrderById(
-    rentalOrderId: string,
-    customerId?: string,
-  ): Promise<RentalOrder> {
+  async getRentalOrderById(rentalOrderId: string, customerId?: string): Promise<RentalOrder> {
     const order = await this.rentalOrderRepository.findOne({
       where: { id: rentalOrderId },
       relations: {

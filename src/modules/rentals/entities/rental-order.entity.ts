@@ -70,20 +70,20 @@ export class RentalOrder {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.rentalOrders, {
+  @ManyToOne(() => User, user => user.rentalOrders, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })
   customer: Relation<User>;
 
-  @OneToMany(() => RentalOrderItem, (item) => item.rentalOrder, {
+  @OneToMany(() => RentalOrderItem, item => item.rentalOrder, {
     cascade: true,
   })
   items: Relation<RentalOrderItem[]>;
 
-  @OneToMany(() => Payment, (payment) => payment.rentalOrder)
+  @OneToMany(() => Payment, payment => payment.rentalOrder)
   payments: Relation<Payment[]>;
 
-  @OneToMany(() => Review, (review) => review.rentalOrder)
+  @OneToMany(() => Review, review => review.rentalOrder)
   reviews: Relation<Review[]>;
 }

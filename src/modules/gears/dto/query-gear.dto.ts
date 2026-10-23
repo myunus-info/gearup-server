@@ -1,13 +1,5 @@
 import { Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { GearCondition } from '../../../common/enums/gear-condition.enum.js';
 
 export class QueryGearDto {

@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ProviderService } from './provider.service.js';
 import { CreateGearDto } from './dto/create-gear.dto.js';
@@ -61,11 +50,7 @@ export class ProviderController {
 
   @Put('gear/:id')
   @ApiOperation({ summary: 'Update own gear item (Provider)' })
-  async updateGear(
-    @Param('id') id: string,
-    @Body() dto: UpdateGearDto,
-    @CurrentUser() user: User,
-  ) {
+  async updateGear(@Param('id') id: string, @Body() dto: UpdateGearDto, @CurrentUser() user: User) {
     const gear = await this.providerService.updateGear(id, dto, user.id);
     return {
       message: 'Gear item updated successfully',
@@ -75,11 +60,7 @@ export class ProviderController {
 
   @Patch('gear/:id')
   @ApiOperation({ summary: 'Partially update own gear item (Provider)' })
-  async patchGear(
-    @Param('id') id: string,
-    @Body() dto: UpdateGearDto,
-    @CurrentUser() user: User,
-  ) {
+  async patchGear(@Param('id') id: string, @Body() dto: UpdateGearDto, @CurrentUser() user: User) {
     const gear = await this.providerService.updateGear(id, dto, user.id);
     return {
       message: 'Gear item updated successfully',
@@ -109,16 +90,8 @@ export class ProviderController {
 
   @Patch('orders/:id')
   @ApiOperation({ summary: 'Update rental order status (Provider)' })
-  async updateOrderStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateOrderStatusDto,
-    @CurrentUser() user: User,
-  ) {
-    const updated = await this.providerService.updateOrderStatus(
-      id,
-      dto.status,
-      user.id,
-    );
+  async updateOrderStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto, @CurrentUser() user: User) {
+    const updated = await this.providerService.updateOrderStatus(id, dto.status, user.id);
     return {
       message: 'Order status updated successfully',
       data: updated,

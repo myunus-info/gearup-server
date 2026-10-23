@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity.js';
@@ -39,7 +35,7 @@ export class CategoriesService {
       throw new NotFoundException('Categories not found!');
     }
 
-    return categories.map((cat) => ({
+    return categories.map(cat => ({
       id: cat.id,
       name: cat.name,
       description: cat.description,

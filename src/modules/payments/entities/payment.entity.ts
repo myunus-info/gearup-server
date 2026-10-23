@@ -66,7 +66,7 @@ export class Payment {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => RentalOrder, (order) => order.payments, {
+  @ManyToOne(() => RentalOrder, order => order.payments, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'rentalOrderId' })

@@ -63,15 +63,11 @@ export class GearsService {
 
     const [items, total] = await qb.skip(skip).take(limit).getManyAndCount();
 
-    const formattedItems = items.map((gear) => {
+    const formattedItems = items.map(gear => {
       const reviews = gear.reviews || [];
       const totalReviews = reviews.length;
       const avgRating =
-        totalReviews > 0
-          ? Math.round(
-              (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10,
-            ) / 10
-          : 0;
+        totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10 : 0;
       Object.assign(gear, {
         avgRating,
         averageRating: avgRating,
@@ -110,11 +106,7 @@ export class GearsService {
     const reviews = gear.reviews || [];
     const totalReviews = reviews.length;
     const avgRating =
-      totalReviews > 0
-        ? Math.round(
-            (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10,
-          ) / 10
-        : 0;
+      totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10 : 0;
 
     Object.assign(gear, {
       avgRating,

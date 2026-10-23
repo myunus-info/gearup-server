@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Throttle } from '../../common/guards/throttler.guard.js';
 import type { Request, Response } from 'express';
@@ -43,10 +34,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Authenticate user and set httpOnly session cookies' })
   @ApiResponse({ status: 200, description: 'Successfully authenticated' })
-  async login(
-    @Body() dto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto);
 
     // Set cookies conforming to Next.js ofetch credentials: "include"
@@ -71,11 +59,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({ summary: 'Refresh access token from httpOnly cookie or body' })
-  async refreshToken(
-    @Req() req: Request,
-    @Body() dto: RefreshTokenDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async refreshToken(@Req() req: Request, @Body() dto: RefreshTokenDto, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies?.refreshToken || dto?.refreshToken;
     const result = await this.authService.refreshToken(token);
 

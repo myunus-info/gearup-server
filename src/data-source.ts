@@ -14,16 +14,7 @@ const environment = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${environment}` });
 dotenv.config({ path: '.env' });
 
-export const allEntities = [
-  User,
-  ProviderProfile,
-  Category,
-  GearItem,
-  RentalOrder,
-  RentalOrderItem,
-  Payment,
-  Review,
-];
+export const allEntities = [User, ProviderProfile, Category, GearItem, RentalOrder, RentalOrderItem, Payment, Review];
 
 export const getDataSourceOptions = (): DataSourceOptions => {
   const databaseUrl = process.env.DATABASE_URL;
@@ -37,10 +28,7 @@ export const getDataSourceOptions = (): DataSourceOptions => {
       migrations: ['dist/migrations/*.js'],
       migrationsRun: false,
       synchronize: environment !== 'production',
-      ssl:
-        process.env.NODE_ENV === 'production'
-          ? { rejectUnauthorized: false }
-          : undefined,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
     };
   }
 

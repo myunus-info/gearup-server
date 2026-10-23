@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { GearItem } from '../gears/entities/gear-item.entity.js';
@@ -82,11 +77,7 @@ export class ProviderService {
     return gear;
   }
 
-  async updateGear(
-    gearId: string,
-    dto: UpdateGearDto,
-    providerId: string,
-  ): Promise<GearItem> {
+  async updateGear(gearId: string, dto: UpdateGearDto, providerId: string): Promise<GearItem> {
     const gear = await this.getGearById(gearId, providerId);
 
     if (dto.categoryId && dto.categoryId !== gear.categoryId) {
@@ -121,18 +112,12 @@ export class ProviderService {
       .innerJoin('order.items', 'item')
       .where('item.gearItemId = :gearId', { gearId })
       .andWhere('order.status IN (:...activeStatuses)', {
-        activeStatuses: [
-          RentalStatus.PLACED,
-          RentalStatus.CONFIRMED,
-          RentalStatus.PICKED_UP,
-        ],
+        activeStatuses: [RentalStatus.PLACED, RentalStatus.CONFIRMED, RentalStatus.PICKED_UP],
       })
       .getCount();
 
     if (activeOrdersCount > 0) {
-      throw new BadRequestException(
-        'Cannot delete gear that is part of active rental orders',
-      );
+      throw new BadRequestException('Cannot delete gear that is part of active rental orders');
     }
 
     await this.gearRepository.remove(gear);
@@ -153,11 +138,7 @@ export class ProviderService {
     return orders;
   }
 
-  async updateOrderStatus(
-    orderId: string,
-    status: RentalStatus,
-    providerId: string,
-  ): Promise<RentalOrder> {
+  async updateOrderStatus(orderId: string, status: RentalStatus, providerId: string): Promise<RentalOrder> {
     const order = await this.rentalOrderRepository.findOne({
       where: { id: orderId },
       relations: { items: { gearItem: true } },
@@ -167,9 +148,7 @@ export class ProviderService {
       throw new NotFoundException('Rental order not found!');
     }
 
-    const ownsGear = order.items.some(
-      (item) => item.gearItem.providerId === providerId,
-    );
+    const ownsGear = order.items.some(item => item.gearItem.providerId === providerId);
 
     if (!ownsGear) {
       throw new ForbiddenException('You do not have gear in this order!');
@@ -185,13 +164,11 @@ export class ProviderService {
 
     const allowed = validTransitions[order.status] || [];
     if (!allowed.includes(status)) {
-      throw new BadRequestException(
-        `Cannot transition order from ${order.status} to ${status}`,
-      );
+      throw new BadRequestException(`Cannot transition order from ${order.status} to ${status}`);
     }
 
     // Process update with rollback in a transaction
-    return this.dataSource.transaction(async (manager) => {
+    return this.dataSource.transaction(async manager => {
       order.status = status;
       if (status === RentalStatus.PICKED_UP) {
         order.pickupConfirmedAt = new Date();
@@ -208,12 +185,7 @@ export class ProviderService {
       // Restore gear stock if order was returned or cancelled
       if (status === RentalStatus.RETURNED || status === RentalStatus.CANCELLED) {
         for (const item of order.items) {
-          await manager.increment(
-            GearItem,
-            { id: item.gearItemId },
-            'quantityAvailable',
-            item.quantity,
-          );
+          await manager.increment(GearItem, { id: item.gearItemId }, 'quantityAvailable', item.quantity);
         }
       }
 

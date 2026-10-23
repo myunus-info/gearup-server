@@ -22,10 +22,7 @@ import { AiModule } from './modules/ai/ai.module.js';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [
-        `.env.${process.env.NODE_ENV || 'development'}`,
-        '.env',
-      ],
+      envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`, '.env'],
       ignoreEnvFile: process.env.NODE_ENV === 'production',
       validate: validateEnv,
     }),

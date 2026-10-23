@@ -6,9 +6,5 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
 import { RolesGuard } from '../guards/roles.guard.js';
 
 export function Auth(...roles: Role[]) {
-  return applyDecorators(
-    Roles(...roles),
-    UseGuards(JwtAuthGuard, RolesGuard),
-    ApiBearerAuth(),
-  );
+  return applyDecorators(Roles(...roles), UseGuards(JwtAuthGuard, RolesGuard), ApiBearerAuth());
 }

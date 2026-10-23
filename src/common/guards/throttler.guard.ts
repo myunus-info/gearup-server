@@ -24,8 +24,7 @@ export interface ThrottleDecoratorArg {
 
 export const THROTTLE_METADATA_KEY = 'custom_throttle_metadata';
 
-export const Throttle = (options: ThrottleDecoratorArg) =>
-  SetMetadata(THROTTLE_METADATA_KEY, options);
+export const Throttle = (options: ThrottleDecoratorArg) => SetMetadata(THROTTLE_METADATA_KEY, options);
 
 export const THROTTLER_OPTIONS_TOKEN = 'CUSTOM_THROTTLER_OPTIONS';
 
@@ -52,15 +51,9 @@ export class ThrottlerGuard implements CanActivate {
   protected getTracker(req: Request): string {
     const forwarded = req.headers?.['x-forwarded-for'];
     if (forwarded) {
-      return Array.isArray(forwarded)
-        ? forwarded[0]
-        : forwarded.split(',')[0].trim();
+      return Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0].trim();
     }
-    return (
-      (req.headers?.['x-real-ip'] as string) ||
-      req.socket?.remoteAddress ||
-      '127.0.0.1'
-    );
+    return (req.headers?.['x-real-ip'] as string) || req.socket?.remoteAddress || '127.0.0.1';
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -68,10 +61,10 @@ export class ThrottlerGuard implements CanActivate {
     const res = context.switchToHttp().getResponse<Response>();
 
     // Route-level override takes precedence over global default
-    const routeThrottle = this.reflector.getAllAndOverride<ThrottleDecoratorArg>(
-      THROTTLE_METADATA_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const routeThrottle = this.reflector.getAllAndOverride<ThrottleDecoratorArg>(THROTTLE_METADATA_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     const defaultOpt = this.defaultOptions?.[0] || { ttl: 60000, limit: 20 };
     const limit = routeThrottle?.default?.limit ?? defaultOpt.limit;
@@ -101,10 +94,7 @@ export class ThrottlerGuard implements CanActivate {
         res.setHeader('X-RateLimit-Remaining', 0);
         res.setHeader('X-RateLimit-Reset', Math.ceil(record.resetAt / 1000));
       }
-      throw new HttpException(
-        'ThrottlerException: Too Many Requests',
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+      throw new HttpException('ThrottlerException: Too Many Requests', HttpStatus.TOO_MANY_REQUESTS);
     }
 
     record.count += 1;

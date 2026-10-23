@@ -22,24 +22,14 @@ export class SslcommerzService {
 
   constructor(private readonly configService: ConfigService) {}
 
-  async initPayment(
-    user: PaymentUserData,
-    order: PaymentOrderData,
-  ): Promise<string> {
+  async initPayment(user: PaymentUserData, order: PaymentOrderData): Promise<string> {
     const storeId = this.configService.get<string>('STORE_ID') || 'testbox';
     const storePass = this.configService.get<string>('STORE_PASS') || 'qwerty';
     const paymentApi =
-      this.configService.get<string>('SSL_PAYMENT_API') ||
-      'https://sandbox.sslcommerz.com/gwprocess/v4/api.php';
-    const successUrl =
-      this.configService.get<string>('SUCCESS_URL') ||
-      'http://localhost:3000/payment/success';
-    const failUrl =
-      this.configService.get<string>('FAIL_URL') ||
-      'http://localhost:3000/payment/fail';
-    const cancelUrl =
-      this.configService.get<string>('CANCEL_URL') ||
-      'http://localhost:3000/payment/cancel';
+      this.configService.get<string>('SSL_PAYMENT_API') || 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php';
+    const successUrl = this.configService.get<string>('SUCCESS_URL') || 'http://localhost:3000/payment/success';
+    const failUrl = this.configService.get<string>('FAIL_URL') || 'http://localhost:3000/payment/fail';
+    const cancelUrl = this.configService.get<string>('CANCEL_URL') || 'http://localhost:3000/payment/cancel';
     const appUrl = this.configService.get<string>('APP_URL') || 'http://localhost:8000';
 
     const transId = `TRNX_ID-${crypto.randomUUID()}`;

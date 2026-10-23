@@ -23,10 +23,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: isProduction
-      ? (
-          origin: string | undefined,
-          callback: (err: Error | null, allow?: boolean) => void,
-        ) => {
+      ? (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
           if (!origin || origin === appUrl) {
             callback(null, true);
           } else {
@@ -67,9 +64,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'GearUp Enterprise API Documentation',
-    customCssUrl: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css',
-    ],
+    customCssUrl: ['https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css'],
     customJs: [
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.min.js',
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.min.js',

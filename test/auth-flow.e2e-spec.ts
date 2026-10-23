@@ -86,8 +86,8 @@ describe('Authentication & Protected Flow (E2E)', () => {
 
     customerCookies = res.headers['set-cookie'] as any as string[];
     expect(customerCookies).toBeDefined();
-    expect(customerCookies.some((c) => c.includes('accessToken='))).toBe(true);
-    expect(customerCookies.some((c) => c.includes('refreshToken='))).toBe(true);
+    expect(customerCookies.some(c => c.includes('accessToken='))).toBe(true);
+    expect(customerCookies.some(c => c.includes('refreshToken='))).toBe(true);
   });
 
   it('Logs in provider to get provider bearer token', async () => {
@@ -114,10 +114,7 @@ describe('Authentication & Protected Flow (E2E)', () => {
   });
 
   it('GET /api/v1/auth/me authenticated via httpOnly cookie', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/api/v1/auth/me')
-      .set('Cookie', customerCookies)
-      .expect(200);
+    const res = await request(app.getHttpServer()).get('/api/v1/auth/me').set('Cookie', customerCookies).expect(200);
 
     expect(res.body.success).toBe(true);
     expect(res.body.data.email).toBe('alice@example.com');
@@ -148,9 +145,7 @@ describe('Authentication & Protected Flow (E2E)', () => {
   });
 
   it('Public can list categories', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/api/v1/categories')
-      .expect(200);
+    const res = await request(app.getHttpServer()).get('/api/v1/categories').expect(200);
 
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);

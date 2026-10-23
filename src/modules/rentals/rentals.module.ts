@@ -9,10 +9,7 @@ import { RentalsService } from './rentals.service.js';
 import { PaymentsModule } from '../payments/payments.module.js';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([RentalOrder, RentalOrderItem, GearItem, Payment]),
-    PaymentsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([RentalOrder, RentalOrderItem, GearItem, Payment]), PaymentsModule],
   controllers: [RentalsController],
   providers: [RentalsService],
   exports: [RentalsService],

@@ -23,7 +23,7 @@ export class AdminService {
       relations: { providerProfile: true },
     });
 
-    return (users || []).map((user) => {
+    return (users || []).map(user => {
       const { password: _pw, ...safeUser } = user;
       void _pw;
       return safeUser;

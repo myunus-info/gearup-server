@@ -1,13 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  ArrayMinSize,
-  IsArray,
-  IsDateString,
-  IsInt,
-  IsString,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { ArrayMinSize, IsArray, IsDateString, IsInt, IsString, Min, ValidateNested } from 'class-validator';
 
 export class RentalOrderItemInputDto {
   @IsString()

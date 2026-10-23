@@ -5,11 +5,7 @@ import { Repository } from 'typeorm';
 import { GearItem } from '../gears/entities/gear-item.entity.js';
 import type { ChatRequestDto } from './dto/chat-request.dto.js';
 
-const CANDIDATE_MODELS = [
-  'gemini-flash-lite-latest',
-  'gemini-flash-latest',
-  'gemini-3.8-flash',
-];
+const CANDIDATE_MODELS = ['gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-3.8-flash'];
 
 export interface AiChatResponse {
   reply: string;
@@ -43,9 +39,9 @@ export class AiService {
       take: 30,
     });
 
-    const inStockGears = allGears.filter((g) => (g.quantityAvailable ?? 0) > 0);
+    const inStockGears = allGears.filter(g => (g.quantityAvailable ?? 0) > 0);
 
-    const catalogSnapshot = inStockGears.slice(0, 25).map((g) => ({
+    const catalogSnapshot = inStockGears.slice(0, 25).map(g => ({
       id: g.id,
       name: g.name,
       category: g.category?.name || 'Outdoor Gear',
@@ -118,16 +114,14 @@ CRITICAL: Return valid JSON with this exact schema:
             const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (rawText) {
               const parsed = JSON.parse(rawText);
-              const recommendedGearIds: string[] = Array.isArray(
-                parsed.recommendedGearIds,
-              )
+              const recommendedGearIds: string[] = Array.isArray(parsed.recommendedGearIds)
                 ? parsed.recommendedGearIds
                 : [];
 
               const recommendedGears = inStockGears
-                .filter((g) => recommendedGearIds.includes(g.id))
+                .filter(g => recommendedGearIds.includes(g.id))
                 .slice(0, 3)
-                .map((g) => ({
+                .map(g => ({
                   id: g.id,
                   name: g.name,
                   pricePerDay: Number(g.pricePerDay),
@@ -154,14 +148,9 @@ CRITICAL: Return valid JSON with this exact schema:
       "I'd love to help you plan your adventure! You can ask me about camping packages, kayaks, mountain bikes, climbing gear, or camera drones.";
     let matchedGears: GearItem[] = [];
 
-    if (
-      lower.includes('camp') ||
-      lower.includes('tent') ||
-      lower.includes('hike') ||
-      lower.includes('pack')
-    ) {
+    if (lower.includes('camp') || lower.includes('tent') || lower.includes('hike') || lower.includes('pack')) {
       matchedGears = inStockGears.filter(
-        (g) =>
+        g =>
           g.name.toLowerCase().includes('tent') ||
           g.name.toLowerCase().includes('pack') ||
           g.category?.name?.toLowerCase().includes('camp'),
@@ -175,7 +164,7 @@ CRITICAL: Return valid JSON with this exact schema:
       lower.includes('sup')
     ) {
       matchedGears = inStockGears.filter(
-        (g) =>
+        g =>
           g.name.toLowerCase().includes('kayak') ||
           g.name.toLowerCase().includes('paddle') ||
           g.name.toLowerCase().includes('sup') ||
@@ -183,26 +172,18 @@ CRITICAL: Return valid JSON with this exact schema:
       );
       reply =
         'Heading out on the water? Our touring kayaks and inflatable SUP paddleboards are fully inspected and ready for coastal or lake adventures.';
-    } else if (
-      lower.includes('drone') ||
-      lower.includes('photo') ||
-      lower.includes('camera')
-    ) {
+    } else if (lower.includes('drone') || lower.includes('photo') || lower.includes('camera')) {
       matchedGears = inStockGears.filter(
-        (g) =>
+        g =>
           g.name.toLowerCase().includes('drone') ||
           g.name.toLowerCase().includes('camera') ||
           g.category?.name?.toLowerCase().includes('photo'),
       );
       reply =
         'For capturing aerial cinematography, our stabilized 4K action drones and camera equipment ensure cinema-quality outdoor footage.';
-    } else if (
-      lower.includes('climb') ||
-      lower.includes('rope') ||
-      lower.includes('harness')
-    ) {
+    } else if (lower.includes('climb') || lower.includes('rope') || lower.includes('harness')) {
       matchedGears = inStockGears.filter(
-        (g) =>
+        g =>
           g.name.toLowerCase().includes('climb') ||
           g.name.toLowerCase().includes('rope') ||
           g.name.toLowerCase().includes('harness') ||
@@ -212,22 +193,18 @@ CRITICAL: Return valid JSON with this exact schema:
         'Safety is our top priority for rock and mountaineering routes. Our climbing ropes and harness kits undergo strict inspection before every rental.';
     } else if (lower.includes('bike') || lower.includes('cycling')) {
       matchedGears = inStockGears.filter(
-        (g) =>
-          g.name.toLowerCase().includes('bike') ||
-          g.category?.name?.toLowerCase().includes('cycling'),
+        g => g.name.toLowerCase().includes('bike') || g.category?.name?.toLowerCase().includes('cycling'),
       );
       reply =
         'Tackling rugged trails? Our full-suspension mountain bikes feature premium suspension and reliable drivetrains for peak performance.';
     }
 
-    const finalMatched = (
-      matchedGears.length > 0 ? matchedGears : inStockGears
-    ).slice(0, 2);
+    const finalMatched = (matchedGears.length > 0 ? matchedGears : inStockGears).slice(0, 2);
 
     return {
       reply,
-      recommendedGearIds: finalMatched.map((g) => g.id),
-      recommendedGears: finalMatched.map((g) => ({
+      recommendedGearIds: finalMatched.map(g => g.id),
+      recommendedGears: finalMatched.map(g => ({
         id: g.id,
         name: g.name,
         pricePerDay: Number(g.pricePerDay),
@@ -246,7 +223,7 @@ CRITICAL: Return valid JSON with this exact schema:
       take: 50,
     });
 
-    const inStockGears = allGears.filter((g) => (g.quantityAvailable ?? 0) > 0);
+    const inStockGears = allGears.filter(g => (g.quantityAvailable ?? 0) > 0);
 
     const defaultCuratedSuggestions = [
       {
@@ -297,7 +274,7 @@ CRITICAL: Return valid JSON with this exact schema:
     if (trimmed) {
       matchingGears = inStockGears
         .filter(
-          (g) =>
+          g =>
             g.name.toLowerCase().includes(trimmed) ||
             g.category?.name?.toLowerCase().includes(trimmed) ||
             g.brand?.toLowerCase().includes(trimmed),
@@ -305,7 +282,7 @@ CRITICAL: Return valid JSON with this exact schema:
         .slice(0, 5);
 
       suggestions = defaultCuratedSuggestions.filter(
-        (s) =>
+        s =>
           s.term.toLowerCase().includes(trimmed) ||
           s.label.toLowerCase().includes(trimmed) ||
           s.category.toLowerCase().includes(trimmed),
@@ -315,7 +292,7 @@ CRITICAL: Return valid JSON with this exact schema:
     return {
       query,
       suggestions: suggestions.slice(0, 6),
-      matchingGears: matchingGears.map((g) => ({
+      matchingGears: matchingGears.map(g => ({
         id: g.id,
         name: g.name,
         brand: g.brand,

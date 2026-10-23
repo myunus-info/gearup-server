@@ -47,19 +47,19 @@ export class Review {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, (user) => user.reviews, {
+  @ManyToOne(() => User, user => user.reviews, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })
   customer: Relation<User>;
 
-  @ManyToOne(() => GearItem, (gear) => gear.reviews, {
+  @ManyToOne(() => GearItem, gear => gear.reviews, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'gearItemId' })
   gearItem: Relation<GearItem>;
 
-  @ManyToOne(() => RentalOrder, (order) => order.reviews, {
+  @ManyToOne(() => RentalOrder, order => order.reviews, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'rentalOrderId' })

@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service.js';
 import { CreateReviewDto } from './dto/create-review.dto.js';
@@ -25,10 +17,7 @@ export class ReviewsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Leave a rating and review for a returned gear item' })
   @ApiResponse({ status: 201, description: 'Review submitted successfully' })
-  async createReview(
-    @Body() dto: CreateReviewDto,
-    @CurrentUser() user: User,
-  ) {
+  async createReview(@Body() dto: CreateReviewDto, @CurrentUser() user: User) {
     const review = await this.reviewsService.createReview(dto, user.id);
     return {
       message: 'Review created successfully',

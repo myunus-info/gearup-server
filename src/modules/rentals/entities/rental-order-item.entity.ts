@@ -1,14 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  type Relation,
-} from 'typeorm';
+import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, type Relation } from 'typeorm';
 import { RentalOrder } from './rental-order.entity.js';
 import { GearItem } from '../../gears/entities/gear-item.entity.js';
 import { numericTransformer } from '../../../common/transformers/numeric.transformer.js';
@@ -52,13 +43,13 @@ export class RentalOrderItem {
   })
   subtotal: number;
 
-  @ManyToOne(() => RentalOrder, (order) => order.items, {
+  @ManyToOne(() => RentalOrder, order => order.items, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'rentalOrderId' })
   rentalOrder: Relation<RentalOrder>;
 
-  @ManyToOne(() => GearItem, (gear) => gear.orderItems, {
+  @ManyToOne(() => GearItem, gear => gear.orderItems, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'gearItemId' })

@@ -50,9 +50,7 @@ describe('GearUp Application (E2E)', () => {
   });
 
   it('GET /api/v1/gears - returns empty or list of gears', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/v1/gears')
-      .expect(200);
+    const response = await request(app.getHttpServer()).get('/api/v1/gears').expect(200);
 
     expect(response.body).toHaveProperty('success', true);
     expect(Array.isArray(response.body.data)).toBe(true);

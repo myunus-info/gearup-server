@@ -90,21 +90,21 @@ export class GearItem {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.gearItems, {
+  @ManyToOne(() => User, user => user.gearItems, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'providerId' })
   provider: Relation<User>;
 
-  @ManyToOne(() => Category, (category) => category.gearItems, {
+  @ManyToOne(() => Category, category => category.gearItems, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'categoryId' })
   category: Relation<Category>;
 
-  @OneToMany(() => RentalOrderItem, (item) => item.gearItem)
+  @OneToMany(() => RentalOrderItem, item => item.gearItem)
   orderItems: Relation<RentalOrderItem[]>;
 
-  @OneToMany(() => Review, (review) => review.gearItem)
+  @OneToMany(() => Review, review => review.gearItem)
   reviews: Relation<Review[]>;
 }

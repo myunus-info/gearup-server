@@ -108,14 +108,11 @@ export class AuthService {
       this.configService.get<string>('JWT_SECRET') ||
       this.configService.get<string>('JWT_ACCESS_SECRET') ||
       'gearUpDefaultSecretKey12345';
-    const accessTokenExpiresIn =
-      this.configService.get<string>('JWT_EXPIRES_IN') || '1d';
+    const accessTokenExpiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '1d';
 
     const refreshTokenSecret =
-      this.configService.get<string>('JWT_REFRESH_SECRET') ||
-      'gearUpDefaultRefreshSecretKey12345';
-    const refreshTokenExpiresIn =
-      this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
+      this.configService.get<string>('JWT_REFRESH_SECRET') || 'gearUpDefaultRefreshSecretKey12345';
+    const refreshTokenExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
 
     const accessToken = this.jwtService.sign(payload, {
       secret: accessTokenSecret,
@@ -143,8 +140,7 @@ export class AuthService {
     }
 
     const refreshTokenSecret =
-      this.configService.get<string>('JWT_REFRESH_SECRET') ||
-      'gearUpDefaultRefreshSecretKey12345';
+      this.configService.get<string>('JWT_REFRESH_SECRET') || 'gearUpDefaultRefreshSecretKey12345';
 
     let payload: any;
     try {
@@ -178,8 +174,7 @@ export class AuthService {
       this.configService.get<string>('JWT_SECRET') ||
       this.configService.get<string>('JWT_ACCESS_SECRET') ||
       'gearUpDefaultSecretKey12345';
-    const accessTokenExpiresIn =
-      this.configService.get<string>('JWT_EXPIRES_IN') || '1d';
+    const accessTokenExpiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '1d';
 
     const accessToken = this.jwtService.sign(newPayload, {
       secret: accessTokenSecret,
