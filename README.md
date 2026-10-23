@@ -1,178 +1,252 @@
-# GearUp Server — Enterprise NestJS 12 REST API
+# GearUp Server ⚙️ — Enterprise NestJS 12 REST API
 
-A production-ready **NestJS 12 Enterprise RESTful API** for **GearUp**, a gear-rental marketplace platform where customers rent outdoor, filmmaking, photography, and adventure gear from equipment providers.
+[![NestJS](https://img.shields.io/badge/NestJS-12.0-E0234E?logo=nestjs)](https://nestjs.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?logo=node.js)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![TypeORM](https://img.shields.io/badge/TypeORM-1.1-FE0803?logo=typeorm)](https://typeorm.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql)](https://www.postgresql.org/)
+[![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite)](https://sqlite.org/)
+[![Stripe](https://img.shields.io/badge/Stripe_SDK-23.0-635BFF?logo=stripe)](https://stripe.com)
+[![SSLCommerz](https://img.shields.io/badge/SSLCommerz-v4.0-059669)](https://sslcommerz.com)
+[![Google Gemini](https://img.shields.io/badge/AI_Engine-Gemini-4285F4?logo=google)](https://ai.google.dev/)
+[![Swagger](https://img.shields.io/badge/OpenAPI-3.0_Swagger-85EA2D?logo=swagger)](https://swagger.io/)
+[![Oxlint](https://img.shields.io/badge/Linter-Oxlint-orange)](https://oxc.rs/)
 
-This modernized backend is rebuilt adhering to the `nestjs-skill` production blueprint, replacing legacy patterns with strict ES Modules, unified `@Auth()` role-based access control, dual-cookie session management compatible with Next.js ofetch `credentials: "include"`, TypeORM with seamless SQLite/Postgres support, and automated inventory management.
-
----
-
-## Architecture & Key Features
-
-- **NestJS 12 & Modern Runtime** — Native ES Modules (`"type": "module"`), Node.js 22+, and modular architecture.
-- **Next.js `ofetch` Cookie Authentication** — Dual-cookie architecture:
-  - Access Token: `1d` lifespan (`24h`), `httpOnly: true`.
-  - Refresh Token: `7d` lifespan, `httpOnly: true`.
-  - SameSite, secure, and partitioned flags configured based on environment (`lax` in dev, `none` in production).
-- **Dual JWT Extraction** — Extracts JWT from httpOnly cookies automatically for browsers, with fallback Bearer authorization header for external API consumers and Swagger.
-- **Unified RBAC (`@Auth(...roles)`)** — Single decorator combining `@Roles()`, `JwtAuthGuard`, `RolesGuard`, account suspension checks, and Swagger `@ApiBearerAuth()`.
-- **Dual Database Flexibility (TypeORM)** — Zero-friction local development using `better-sqlite3` (no local PostgreSQL setup required), and PostgreSQL for production via `DATABASE_URL`.
-- **Automated Inventory & Transaction Integrity** — Atomically decrements available inventory upon order placement, and automatically rolls back/restores gear quantity when orders are returned or cancelled.
-- **Integrated Payments (SSLCommerz & Sandbox Fallback)** — Seamless checkout flow initiating gateway sessions, handling IPN webhooks, and marking payments `PAID` and orders `CONFIRMED`.
-- **Environment Validation (class-validator)** — Strictly typed configuration using `class-validator` + `class-transformer` without redundant external validation libraries.
-- **Rate Limiting (`@nestjs/throttler`)** — Platform-wide throttling with sensitive route overrides (`5 req/min` on login/register, `10 req/min` on refresh-token).
-- **Interactive OpenAPI / Swagger** — Introspected Swagger docs at `/api/docs` with auto-documented DTOs via the `@nestjs/swagger` compiler plugin.
-- **High-Speed Testing & Linting** — Fast Vitest unit/e2e test suite and Oxlint verification.
+> A production-ready, highly modular **NestJS 12 Enterprise RESTful API** powering the **GearUp** peer-to-peer equipment rental marketplace. Features dual-token httpOnly cookie authentication, unified RBAC, multi-gateway payment orchestration (Stripe Checkout & SSLCommerz), dual-mode TypeORM (better-sqlite3 in dev / PostgreSQL in production), inventory concurrency control, and Google Gemini-powered AI inventory concierge.
 
 ---
 
-## Project Structure
+## 🌐 Live Production Deployments & Endpoints
+
+| Resource | URL | Description |
+| :--- | :--- | :--- |
+| **API Base URL** | [https://gearup-nestjs-server.vercel.app/api/v1](https://gearup-nestjs-server.vercel.app/api/v1) | Production API endpoint prefix |
+| **Interactive Swagger UI** | [https://gearup-nestjs-server.vercel.app/api/docs](https://gearup-nestjs-server.vercel.app/api/docs) | OpenAPI 3.0 interactive sandbox with JWT auth |
+| **Health Check & Uptime** | [https://gearup-nestjs-server.vercel.app/health](https://gearup-nestjs-server.vercel.app/health) | Live service status and uptime telemetry |
+| **Frontend Application** | [https://gearup-six-kohl.vercel.app](https://gearup-six-kohl.vercel.app) | Production Next.js 16 client |
+
+---
+
+## 🏗️ Architecture & Core System Features
+
+### 1. Multi-Gateway Payment System (Strategy & Factory Pattern)
+- **Interface Segregation (`IPaymentGateway`)**: Enforces a strict contract (`provider`, `initiatePayment`, `verifyPayment`) implemented independently by vendor adapters:
+  - **`StripeGateway`**: Creates Stripe Checkout sessions in USD, verifies checkout sessions, and processes cryptographic webhook signatures.
+  - **`SslcommerzGateway`**: Initiates BDT gateway sessions, validates transactions through SSLCommerz's official APIs, and provides resilient sandbox fallback.
+- **Dynamic Provider Registry (`PaymentGatewayFactory`)**: Resolves the appropriate gateway at runtime based on user selection or auto-detects providers from transaction identifiers (`cs_` for Stripe, `TRNX_` for SSLCommerz).
+- **Dual SSLCommerz Validation APIs**:
+  - `merchantTransIDvalidationAPI.php`: Validates merchant transaction IDs (`tran_id`).
+  - `validationserverAPI.php`: Validates gateway internal validation codes (`val_id`).
+- **Atomic Confirmation Transactions**: Payment confirmations run inside TypeORM database transactions that atomically mark the `Payment` as `PAID` and the `RentalOrder` as `CONFIRMED`.
+- **Dedicated Webhook Controller (`StripeWebhookController`)**: Machine-to-machine endpoint (`POST /payments/stripe/webhook`) segregated from customer-facing authentication flows.
+
+### 2. Grounded AI Concierge (`AiModule`)
+- **Real-Time Database Grounding**: Queries available equipment (`quantityAvailable > 0 && isActive = true`) from the `GearItem` repository and injects the live catalog into the system prompt, guaranteeing **zero AI hallucinations**.
+- **Model Cascading**: Queries Google Gemini (`gemini-flash-lite-latest` → `gemini-flash-latest`) for sub-second responses with heuristic fallback.
+- **Search Suggestions (`/api/v1/ai/suggestions`)**: Generates structured, debounced search recommendations categorized into categories, gear matches, and adventure activity intents.
+
+### 3. Authentication & Cookie Flow (Next.js Compatible)
+- **Dual-Token Lifetime**:
+  - `accessToken`: 1-day expiration (`1d`), maxAge: `24 * 60 * 60 * 1000` ms.
+  - `refreshToken`: 7-day expiration (`7d`), maxAge: `7 * 24 * 60 * 60 * 1000` ms.
+- **Cookie Security Options**: `httpOnly: true`, `secure: isProd`, `sameSite: isProd ? 'none' : 'lax'`, `partitioned: isProd`, `path: '/'`.
+- **Dual-Extractor JWT Strategy**: Automatically extracts JWTs from httpOnly cookies for Next.js browser clients (`credentials: "include"`), with Bearer header fallback for external clients and Swagger UI.
+- **Unified `@Auth(...roles)`**: Single composite decorator combining `@Roles()`, `JwtAuthGuard`, `RolesGuard`, user suspension checks, and Swagger `@ApiBearerAuth()`.
+
+### 4. Database Architecture & Concurrency Integrity
+- **Dual Database Flexibility**:
+  - **Development**: Local zero-configuration `better-sqlite3` storage (`gearup.sqlite`).
+  - **Production**: High-concurrency PostgreSQL hosted on Supabase via `DATABASE_URL`.
+- **Numeric Decimal Transformers**: Custom `ValueTransformer` ensuring decimal columns return native JavaScript numbers across both SQLite and PostgreSQL drivers.
+- **Inventory Concurrency Control**: Atomically decrements `quantityAvailable` inside database transactions upon rental order placement, and automatically restores stock when orders are cancelled or returned.
+
+### 5. Serverless Vercel Deployment Architecture
+- **In-Memory Express Adapter (`api/index.ts`)**: Caches the NestJS application instance across serverless function invocations to eliminate cold start latency.
+- **Asset Bundling**: Configures `vercel.json` with `includeFiles` to package the PostgreSQL driver (`pg`) and Swagger UI assets.
+- **Resilient Gateway CORS**: Whitelists payment gateway origins (`*.sslcommerz.com`, `stripe.com`) and utilizes safe CORS fallback (`callback(null, false)`) to prevent fatal 500 errors during cross-origin gateway submissions.
+
+---
+
+## 📁 Project Directory Structure
 
 ```
 gearup-server/
+├── api/
+│   └── index.ts                 # Vercel Serverless Function entrypoint (with cached Express adapter)
 ├── src/
 │   ├── common/
-│   │   ├── decorators/         # @Auth(...roles), @CurrentUser(), @Roles()
-│   │   ├── enums/              # Role, UserStatus, GearCondition, RentalStatus, etc.
-│   │   ├── filters/            # AllExceptionsFilter (standard error envelope)
-│   │   ├── guards/             # JwtAuthGuard, RolesGuard
-│   │   ├── interceptors/       # LoggingInterceptor, TransformInterceptor (standard envelope)
-│   │   ├── transformers/       # numeric.transformer.ts (ValueTransformer)
-│   │   └── utils/              # auth.util.ts (handleCookies)
+│   │   ├── decorators/          # @Auth(...roles), @CurrentUser(), @Roles()
+│   │   ├── enums/               # Role, UserStatus, GearCondition, RentalStatus, PaymentProvider
+│   │   ├── filters/             # AllExceptionsFilter (standard error envelope)
+│   │   ├── guards/              # JwtAuthGuard, RolesGuard, ThrottlerGuard
+│   │   ├── interceptors/        # LoggingInterceptor, TransformInterceptor (standard success envelope)
+│   │   ├── transformers/        # numeric.transformer.ts (ValueTransformer)
+│   │   └── utils/               # auth.util.ts (handleCookies)
 │   ├── config/
-│   │   └── env.validation.ts   # class-validator environment validation
+│   │   └── env.validation.ts    # class-validator environment validation
 │   ├── modules/
-│   │   ├── auth/               # Register, login, refresh-token, logout, getMe
-│   │   │   └── entities/       # User, ProviderProfile
-│   │   ├── admin/              # User oversight, status toggle, platform audit
-│   │   ├── categories/         # Category CRUD
-│   │   │   └── entities/       # Category
-│   │   ├── gears/              # Public catalog search, filters, pagination
-│   │   │   └── entities/       # GearItem
-│   │   ├── provider/           # Provider gear inventory & order lifecycle
-│   │   ├── rentals/            # Customer rental orders & stock decrement
-│   │   │   └── entities/       # RentalOrder, RentalOrderItem
-│   │   ├── payments/           # SSLCommerz initiation & webhook confirmation
-│   │   │   └── entities/       # Payment
-│   │   └── reviews/            # Verified customer ratings & feedback
-│   │       └── entities/       # Review
-│   ├── data-source.ts          # TypeORM DataSource configuration
-│   ├── app.controller.ts       # Health checks & info
-│   ├── app.module.ts           # Root module configuration
-│   └── main.ts                 # Bootstrap with Swagger, CORS & cookie parser
-├── test/                       # Vitest E2E integration test suites
-├── vitest.config.ts            # Vitest unit test configuration
-├── vitest.config.e2e.ts        # Vitest E2E test configuration
-├── nest-cli.json               # Nest CLI with Swagger introspect comments plugin
-└── tsconfig.json
+│   │   ├── admin/               # Platform governance, user moderation, rental audits
+│   │   ├── ai/                  # Gemini-powered inventory concierge & suggestions
+│   │   ├── auth/                # Register, login, refresh-token, logout, me
+│   │   │   └── entities/        # User, ProviderProfile
+│   │   ├── categories/          # Gear category management
+│   │   │   └── entities/        # Category
+│   │   ├── gears/               # Public catalog browsing, filtering, search
+│   │   │   └── entities/        # GearItem
+│   │   ├── payments/            # Multi-gateway payment orchestration
+│   │   │   ├── controllers/     # StripeWebhookController (dedicated machine webhook)
+│   │   │   ├── gateways/        # StripeGateway, SslcommerzGateway, PaymentGatewayFactory
+│   │   │   ├── interfaces/      # IPaymentGateway, PaymentCustomerData, PaymentOrderData
+│   │   │   └── entities/        # Payment
+│   │   ├── provider/            # Provider inventory CRUD & order handoffs
+│   │   ├── rentals/             # Customer bookings & inventory stock decrements
+│   │   │   └── entities/        # RentalOrder, RentalOrderItem
+│   │   └── reviews/             # Verified customer ratings & feedback
+│   │       └── entities/        # Review
+│   ├── data-source.ts           # TypeORM DataSource configuration (dual SQLite/Postgres)
+│   ├── app.controller.ts        # Root info & health check endpoints
+│   ├── app.module.ts            # Root module importing all feature modules
+│   └── main.ts                  # Local development bootstrap with Swagger & CORS
+├── vercel.json                  # Serverless function configuration & route rewrites
+├── nest-cli.json                # Nest CLI configuration with Swagger introspectComments
+└── tsconfig.json                # TypeScript strict configuration
 ```
 
 ---
 
-## Getting Started
+## 📋 API Endpoints Inventory
 
-### 1. Install Dependencies
+All feature endpoints are versioned under the `/api/v1` prefix.
 
+### 1. Authentication (`/api/v1/auth`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/auth/register` | Public | Register new `CUSTOMER` or `PROVIDER` account |
+| `POST` | `/auth/login` | Public | Authenticate user, issue access (1d) & refresh (7d) cookies |
+| `POST` | `/auth/refresh-token` | Public | Reissue access token using httpOnly refresh cookie |
+| `POST` | `/auth/logout` | Public | Clear session cookies |
+| `GET` | `/auth/me` | `@Auth()` | Retrieve current authenticated user profile |
+
+### 2. Public Catalog & Categories (`/api/v1/gears`, `/api/v1/categories`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/categories` | Public | List all gear categories with active item counts |
+| `POST` | `/categories` | `@Auth(Role.PROVIDER)` | Create a new gear category |
+| `GET` | `/gears` | Public | Browse catalog with debounced search, category, brand, condition, and price filters |
+| `GET` | `/gears/:id` | Public | Retrieve single gear specifications, provider details, and verified reviews |
+
+### 3. Equipment Provider Portal (`/api/v1/provider`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/provider/gear` | `@Auth(Role.PROVIDER)` | List provider's own equipment inventory with pagination |
+| `POST` | `/provider/gear` | `@Auth(Role.PROVIDER)` | Add a new equipment listing to the platform |
+| `GET` | `/provider/gear/:id` | `@Auth(Role.PROVIDER)` | Get provider's own gear item details |
+| `PUT` | `/provider/gear/:id` | `@Auth(Role.PROVIDER)` | Update equipment specifications, pricing, and condition |
+| `DELETE` | `/provider/gear/:id` | `@Auth(Role.PROVIDER)` | Soft-delete equipment listing |
+| `GET` | `/provider/orders` | `@Auth(Role.PROVIDER)` | List rental orders containing provider's equipment |
+| `PATCH` | `/provider/orders/:id` | `@Auth(Role.PROVIDER)` | Update rental status (`CONFIRMED` → `PICKED_UP` → `RETURNED` / `CANCELLED`) |
+
+### 4. Customer Rentals & Orders (`/api/v1/rentals`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/rentals` | `@Auth(Role.CUSTOMER)` | Create rental booking, calculate duration, and decrement stock |
+| `GET` | `/rentals` | `@Auth(Role.CUSTOMER)` | List customer's own rental order history with statuses |
+| `GET` | `/rentals/:id` | `@Auth(Role.CUSTOMER)` | Retrieve single rental order details |
+
+### 5. Multi-Gateway Payments (`/api/v1/payments`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/payments/initiate` | `@Auth(Role.CUSTOMER)` | Create checkout session (Stripe or SSLCommerz) and return payment URL |
+| `POST` | `/payments/confirm` | Public | Idempotently verify transaction (Stripe session or SSLCommerz tranId) & mark `PAID` |
+| `POST` | `/payments/sslcommerz/ipn` | Public | SSLCommerz background server-to-server IPN listener |
+| `POST` | `/payments/stripe/webhook` | Public | Stripe asynchronous webhook listener with signature verification |
+| `GET` | `/payments` | `@Auth(Role.CUSTOMER)` | Customer payment transaction history table |
+| `GET` | `/payments/:id` | `@Auth(Role.CUSTOMER)` | Retrieve single payment record |
+
+### 6. Grounded AI Concierge (`/api/v1/ai`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/ai/chat` | Public | Conversational assistant grounded in real-time inventory |
+| `GET` | `/ai/suggestions` | Public | Semantic search autocomplete suggestions |
+
+### 7. Reviews & Ratings (`/api/v1/reviews`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/reviews` | `@Auth(Role.CUSTOMER)` | Submit verified rating and review for returned equipment |
+| `GET` | `/reviews/gear/:id` | Public | List reviews for a specific equipment item |
+
+### 8. Platform Admin Governance (`/api/v1/admin`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/admin/users` | `@Auth(Role.ADMIN)` | List all platform users with role and status filters |
+| `PATCH` | `/admin/users/:id` | `@Auth(Role.ADMIN)` | Toggle user account status (`ACTIVE` / `SUSPENDED`) |
+| `GET` | `/admin/gear` | `@Auth(Role.ADMIN)` | Catalog oversight table with status filters |
+| `GET` | `/admin/rentals` | `@Auth(Role.ADMIN)` | Platform-wide rental audit table |
+
+---
+
+## 🚀 Local Development Setup
+
+### 1. Prerequisites
+- Node.js 22+ (recommended: Node.js 24)
+- npm
+
+### 2. Clone Repository & Install Dependencies
 ```bash
+git clone https://github.com/myunus-info/gearup-server.git
+cd gearup-server
 npm install
 ```
 
-### 2. Configure Environment
+### 3. Configure Environment Variables
+Create a `.env` or `.env.development` file:
+```env
+NODE_ENV=development
+PORT=8000
+DB_NAME=gearup.sqlite
+CLIENT_URL=http://localhost:3000
+BACKEND_URL=http://localhost:8000
 
-Copy the example `.env.example` file:
+BCRYPT_SALT_ROUNDS=12
+JWT_SECRET=someSuperAccessSecretKey12345
+JWT_ACCESS_SECRET=someSuperAccessSecretKey12345
+JWT_EXPIRES_IN=1d
+JWT_REFRESH_SECRET=someSuperRefreshSecretKey12345
+JWT_REFRESH_EXPIRES_IN=7d
 
-```bash
-cp .env.example .env.development
+# SSLCommerz Configuration (Sandbox)
+STORE_ID=testbox
+STORE_PASS=qwerty
+SSL_PAYMENT_API=https://sandbox.sslcommerz.com/gwprocess/v4/api.php
+SSL_VALIDATION_API=https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=sk_test_your_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_secret_here
+
+# Google Gemini AI Key
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-Default values in `.env.development` are preconfigured to run out of the box using `better-sqlite3`.
-
-### 3. Start Development Server
-
+### 4. Run Development Server
 ```bash
 npm run start:dev
 ```
-
 - API Base URL: `http://localhost:8000/api/v1`
-- Swagger UI Documentation: `http://localhost:8000/api/docs`
+- Swagger UI Sandbox: `http://localhost:8000/api/docs`
+- Health Check: `http://localhost:8000/health`
 
----
-
-## Testing & Linting
-
+### 5. Verification & Linting
 ```bash
-# Run ultra-fast Oxlint check
+# High-speed Oxlint lint check
 npm run lint
 
-# Run Vitest unit tests
-npm run test
-
-# Run Vitest E2E integration tests
-npm run test:e2e
-
-# Production build
+# TypeScript compilation & production build
 npm run build
 ```
 
 ---
 
-## API Reference
+## 👥 Contributors & Acknowledgements
 
-All endpoints are prefixed with `/api/v1`.
-
-### Response Format
-
-Success envelope:
-
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Operation successful",
-  "data": {},
-  "meta": { "page": 1, "limit": 10, "total": 1, "totalPages": 1 }
-}
-```
-
-Error envelope:
-
-```json
-{
-  "success": false,
-  "statusCode": 400,
-  "message": "Validation failed",
-  "errorSources": [{ "path": "email", "message": "Invalid email address" }]
-}
-```
-
-### Endpoints Overview
-
-| Area           | Method      | Endpoint                           | Access                 | Description                                                                |
-| -------------- | ----------- | ---------------------------------- | ---------------------- | -------------------------------------------------------------------------- |
-| **Auth**       | POST        | `/api/v1/auth/register`            | Public                 | Register new user (`CUSTOMER`, `PROVIDER`, or `ADMIN`)                     |
-|                | POST        | `/api/v1/auth/login`               | Public                 | Authenticate user & set httpOnly cookies                                   |
-|                | POST        | `/api/v1/auth/refresh-token`       | Public                 | Refresh access token from cookie/body                                      |
-|                | POST        | `/api/v1/auth/logout`              | Public                 | Clear httpOnly session cookies                                             |
-|                | GET         | `/api/v1/auth/me`                  | `@Auth()`              | Get current authenticated user profile                                     |
-| **Categories** | POST        | `/api/v1/categories`               | `@Auth(Role.PROVIDER)` | Create a gear category                                                     |
-|                | GET         | `/api/v1/categories`               | Public                 | List all categories with gear count                                        |
-| **Gears**      | GET         | `/api/v1/gears`                    | Public                 | Browse/filter gear listings with pagination                                |
-|                | GET         | `/api/v1/gears/:id`                | Public                 | Get single gear item details with reviews                                  |
-| **Provider**   | POST        | `/api/v1/provider/gear`            | `@Auth(Role.PROVIDER)` | Add a new gear listing                                                     |
-|                | GET         | `/api/v1/provider/gear`            | `@Auth(Role.PROVIDER)` | List provider's own gear items                                             |
-|                | GET         | `/api/v1/provider/gear/:id`        | `@Auth(Role.PROVIDER)` | Get single own gear item                                                   |
-|                | PUT / PATCH | `/api/v1/provider/gear/:id`        | `@Auth(Role.PROVIDER)` | Update own gear listing                                                    |
-|                | DELETE      | `/api/v1/provider/gear/:id`        | `@Auth(Role.PROVIDER)` | Delete own gear listing                                                    |
-|                | GET         | `/api/v1/provider/orders`          | `@Auth(Role.PROVIDER)` | List orders containing provider gear                                       |
-|                | PATCH       | `/api/v1/provider/orders/:id`      | `@Auth(Role.PROVIDER)` | Update order status (`CONFIRMED` → `PICKED_UP` → `RETURNED` / `CANCELLED`) |
-| **Rentals**    | POST        | `/api/v1/rentals`                  | `@Auth(Role.CUSTOMER)` | Place rental order, decrement stock, and get payment URL                   |
-|                | GET         | `/api/v1/rentals`                  | `@Auth(Role.CUSTOMER)` | List customer's own rental orders                                          |
-|                | GET         | `/api/v1/rentals/:id`              | `@Auth(Role.CUSTOMER)` | Get rental order details                                                   |
-| **Payments**   | POST        | `/api/v1/payments/confirm`         | Public                 | Webhook / confirmation callback                                            |
-|                | GET         | `/api/v1/payments`                 | `@Auth(Role.CUSTOMER)` | List customer payment history                                              |
-|                | GET         | `/api/v1/payments/:id`             | `@Auth(Role.CUSTOMER)` | Get payment record by ID                                                   |
-| **Reviews**    | POST        | `/api/v1/reviews`                  | `@Auth(Role.CUSTOMER)` | Leave a review for returned gear                                           |
-|                | GET         | `/api/v1/reviews/gear/:gearItemId` | Public                 | List reviews for a specific gear item                                      |
-| **Admin**      | GET         | `/api/v1/admin/users`              | `@Auth(Role.ADMIN)`    | List all platform users                                                    |
-|                | PATCH       | `/api/v1/admin/users/:id`          | `@Auth(Role.ADMIN)`    | Update user status (`ACTIVE` / `SUSPENDED`)                                |
-|                | GET         | `/api/v1/admin/gear`               | `@Auth(Role.ADMIN)`    | List all platform gear listings                                            |
-|                | GET         | `/api/v1/admin/rentals`            | `@Auth(Role.ADMIN)`    | List all platform rental orders                                            |
+Developed by **Mohammad Yunus** as part of the advanced full-stack assignment series, demonstrating modern decoupled architecture, enterprise payment gateway orchestration, and grounded AI assistant integration.
