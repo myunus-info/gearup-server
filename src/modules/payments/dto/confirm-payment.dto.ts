@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsObject, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import { PaymentProvider } from '../../../common/enums/payment-provider.enum.js';
 
 export class ConfirmPaymentDto {
   @IsString()
@@ -6,10 +7,18 @@ export class ConfirmPaymentDto {
   orderId: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Transaction ID is required' })
-  tranId: string;
+  @IsOptional()
+  tranId?: string;
+
+  @IsString()
+  @IsOptional()
+  sessionId?: string;
+
+  @IsEnum(PaymentProvider)
+  @IsOptional()
+  provider?: PaymentProvider;
 
   @IsObject()
-  @IsNotEmpty()
-  payload: Record<string, any>;
+  @IsOptional()
+  payload?: Record<string, any>;
 }

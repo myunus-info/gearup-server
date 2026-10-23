@@ -85,6 +85,14 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   GEMINI_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  STRIPE_SECRET_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  STRIPE_WEBHOOK_SECRET?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

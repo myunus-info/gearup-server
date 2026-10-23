@@ -2,27 +2,24 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import crypto from 'crypto';
+import { PaymentProvider } from '../../common/enums/payment-provider.enum.js';
+import type {
+  IPaymentGateway,
+  PaymentCustomerData,
+  PaymentOrderData,
+  PaymentVerificationResult,
+} from './interfaces/payment-gateway.interface.js';
 
-export interface PaymentUserData {
-  id?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-}
-
-export interface PaymentOrderData {
-  id: string;
-  totalAmount: number;
-}
+export { PaymentCustomerData as PaymentUserData, PaymentOrderData };
 
 @Injectable()
-export class SslcommerzService {
+export class SslcommerzService implements IPaymentGateway {
+  readonly provider = PaymentProvider.SSLCOMMERZ;
   private readonly logger = new Logger(SslcommerzService.name);
 
   constructor(private readonly configService: ConfigService) {}
 
-  async initPayment(user: PaymentUserData, order: PaymentOrderData): Promise<string> {
+  async initPayment(user: PaymentCustomerData, order: PaymentOrderData): Promise<string> {
     const storeId = this.configService.get<string>('STORE_ID') || 'testbox';
     const storePass = this.configService.get<string>('STORE_PASS') || 'qwerty';
     const paymentApi =
@@ -90,7 +87,11 @@ export class SslcommerzService {
     return `${successUrl}?orderId=${order.id}&tranId=${transId}&status=success&simulated=true`;
   }
 
-  async verifyPayment(valId: string): Promise<Record<string, any>> {
+  async initiatePayment(user: PaymentCustomerData, order: PaymentOrderData): Promise<string> {
+    return this.initPayment(user, order);
+  }
+
+  async verifyPayment(valId: string): Promise<PaymentVerificationResult & Record<string, any>> {
     const storeId = this.configService.get<string>('STORE_ID') || 'testbox';
     const storePass = this.configService.get<string>('STORE_PASS') || 'qwerty';
     const validationApi =
@@ -105,17 +106,35 @@ export class SslcommerzService {
       });
 
       if (res.data) {
-        return res.data;
+        const isPaid = res.data.status === 'VALID' || res.data.status === 'VALIDATED';
+        return {
+          isPaid,
+          transactionId: res.data.tran_id || valId,
+          method: res.data.card_type || 'CREDIT_CARD',
+          amount: Number(res.data.amount || 0),
+          currency: res.data.currency || 'BDT',
+          rawResponse: res.data,
+          ...res.data,
+        };
       }
     } catch (err: any) {
       this.logger.warn(`SSLCommerz verification call failed: ${err.message}. Using fallback validation.`);
     }
 
-    return {
+    const fallback = {
       status: 'VALID',
       val_id: valId,
       card_type: 'CREDIT_CARD',
       currency: 'BDT',
+    };
+
+    return {
+      isPaid: true,
+      transactionId: valId,
+      method: 'CREDIT_CARD',
+      amount: 0,
+      currency: 'BDT',
+      rawResponse: fallback,
     };
   }
 }

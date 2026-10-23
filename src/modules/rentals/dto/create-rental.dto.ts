@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsDateString, IsInt, IsString, Min, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsDateString, IsEnum, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { PaymentProvider } from '../../../common/enums/payment-provider.enum.js';
 
 export class RentalOrderItemInputDto {
   @IsString()
@@ -22,4 +23,8 @@ export class CreateRentalDto {
   @ValidateNested({ each: true })
   @Type(() => RentalOrderItemInputDto)
   items: RentalOrderItemInputDto[];
+
+  @IsEnum(PaymentProvider)
+  @IsOptional()
+  provider?: PaymentProvider = PaymentProvider.SSLCOMMERZ;
 }

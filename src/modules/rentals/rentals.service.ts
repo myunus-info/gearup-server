@@ -8,6 +8,7 @@ import { Payment } from '../payments/entities/payment.entity.js';
 import { User } from '../auth/entities/user.entity.js';
 import { RentalStatus } from '../../common/enums/rental-status.enum.js';
 import { PaymentStatus } from '../../common/enums/payment-status.enum.js';
+import { PaymentProvider } from '../../common/enums/payment-provider.enum.js';
 import { PaymentsService } from '../payments/payments.service.js';
 import { CreateRentalDto } from './dto/create-rental.dto.js';
 
@@ -139,6 +140,7 @@ export class RentalsService {
       const payment = manager.create(Payment, {
         rentalOrderId: persistedOrder.id,
         amount: persistedOrder.totalAmount,
+        provider: dto.provider || PaymentProvider.SSLCOMMERZ,
         status: PaymentStatus.PENDING,
       });
       await manager.save(Payment, payment);
@@ -167,7 +169,13 @@ export class RentalsService {
         {
           id: savedOrder.id,
           totalAmount: savedOrder.totalAmount,
+          items: savedOrder.items?.map(i => ({
+            name: i.gearItem?.name || 'Equipment Rental',
+            quantity: i.quantity,
+            unitPrice: Number(i.pricePerDaySnapshot),
+          })),
         },
+        dto.provider || PaymentProvider.SSLCOMMERZ,
       );
     } catch {
       paymentUrl = null;
