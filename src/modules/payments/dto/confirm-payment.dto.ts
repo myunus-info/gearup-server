@@ -18,6 +18,10 @@ export class ConfirmPaymentDto {
   @IsOptional()
   provider?: PaymentProvider;
 
+  @IsString()
+  @IsOptional()
+  status?: string;
+
   @IsObject()
   @IsOptional()
   payload?: Record<string, any>;
