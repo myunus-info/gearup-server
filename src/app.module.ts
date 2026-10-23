@@ -16,6 +16,7 @@ import { ProviderModule } from './modules/provider/provider.module.js';
 import { RentalsModule } from './modules/rentals/rentals.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { ReviewsModule } from './modules/reviews/reviews.module.js';
+import { AiModule } from './modules/ai/ai.module.js';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module.js';
     RentalsModule,
     PaymentsModule,
     ReviewsModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [

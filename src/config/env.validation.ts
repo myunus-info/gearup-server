@@ -87,6 +87,10 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   SSL_VALIDATION_API: string = 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php';
+
+  @IsString()
+  @IsOptional()
+  GEMINI_API_KEY?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
