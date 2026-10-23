@@ -13,8 +13,8 @@ export class PaymentGatewayFactory {
     private readonly sslcommerzGateway: SslcommerzGateway,
     private readonly stripeGateway: StripeGateway,
   ) {
-    this.gateways.set(PaymentProvider.SSLCOMMERZ, sslcommerzGateway);
-    this.gateways.set(PaymentProvider.STRIPE, stripeGateway);
+    this.gateways.set(PaymentProvider.SSLCOMMERZ, this.sslcommerzGateway);
+    this.gateways.set(PaymentProvider.STRIPE, this.stripeGateway);
   }
 
   get(provider: PaymentProvider = PaymentProvider.SSLCOMMERZ): IPaymentGateway {
@@ -38,9 +38,7 @@ export class PaymentGatewayFactory {
     }
 
     const sessionId =
-      dto.sessionId ||
-      dto.tranId ||
-      (typeof dto.payload?.session_id === 'string' ? dto.payload.session_id : undefined);
+      dto.sessionId || dto.tranId || (typeof dto.payload?.session_id === 'string' ? dto.payload.session_id : undefined);
 
     if (sessionId && sessionId.startsWith('cs_')) {
       return PaymentProvider.STRIPE;

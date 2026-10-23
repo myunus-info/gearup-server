@@ -13,7 +13,7 @@ import { User } from '../auth/entities/user.entity.js';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Post(['initiate', 'create'])
+  @Post('create')
   @Auth(Role.CUSTOMER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Initiate payment session (Stripe or SSLCommerz) for an existing rental order' })
@@ -26,7 +26,7 @@ export class PaymentsController {
     };
   }
 
-  @Post(['confirm', 'ipn'])
+  @Post('confirm')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify and confirm payment (supports both Stripe and SSLCommerz)' })
   @ApiResponse({ status: 200, description: 'Payment successfully confirmed and order status updated' })
