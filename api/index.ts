@@ -26,11 +26,9 @@ async function bootstrapServer(): Promise<express.Express> {
 
   const isProduction = configService.get<string>('NODE_ENV') === 'production';
   const appUrl = configService.get<string>('CLIENT_URL');
-  const allowedOrigins = [
-    appUrl,
-    appUrl?.replace(/\/$/, ''),
-    'https://gearup-nestjs-server.vercel.app',
-  ].filter(Boolean) as string[];
+  const allowedOrigins = [appUrl, appUrl?.replace(/\/$/, ''), 'https://gearup-nestjs-server.vercel.app'].filter(
+    Boolean,
+  ) as string[];
 
   const extraOrigins = (appUrl || '')
     .split(',')
