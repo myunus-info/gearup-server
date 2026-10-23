@@ -38,9 +38,9 @@ export class SslcommerzGateway implements IPaymentGateway {
       total_amount: order.totalAmount,
       currency: 'BDT',
       tran_id: transId,
-      success_url: `${successUrl}?orderId=${order.id}&tranId=${transId}&status=success`,
-      fail_url: `${failUrl}?orderId=${order.id}&tranId=${transId}&status=fail`,
-      cancel_url: `${cancelUrl}?orderId=${order.id}&tranId=${transId}&status=cancel`,
+      success_url: `${successUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=success`,
+      fail_url: `${failUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=fail`,
+      cancel_url: `${cancelUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=cancel`,
       ipn_url: `${appUrl}/api/v1/payments/ipn`,
       shipping_method: 'N/A',
       product_name: 'Gear Rental Order',
@@ -85,7 +85,7 @@ export class SslcommerzGateway implements IPaymentGateway {
     }
 
     // Reliable sandbox fallback if SSLCommerz testbox is rate-limited or unreachable
-    return `${successUrl}?orderId=${order.id}&tranId=${transId}&status=success&simulated=true`;
+    return `${successUrl}?orderId=${order.id}&tranId=${transId}&gateway=SSLCOMMERZ&status=success&simulated=true`;
   }
 
   async verifyPayment(dto: ConfirmPaymentDto): Promise<PaymentVerificationResult> {
